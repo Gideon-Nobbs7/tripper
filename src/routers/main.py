@@ -4,12 +4,13 @@ from typing import List
 
 import aiohttp
 import uvicorn
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, APIRouter
 
-from src.schema import BatchGeocodeModel, CoordinateModel, GeocodeModel
-from src.utils import GeocodeClass
+from src.schema.schema import BatchGeocodeModel, CoordinateModel, GeocodeModel
+from src.services.geocode import GeocodeClass
 
-app = FastAPI()
+
+app = APIRouter()
 
 
 @app.get(
