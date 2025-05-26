@@ -8,6 +8,7 @@ from fastapi import FastAPI, Query, APIRouter
 
 from src.schema.schema import BatchGeocodeModel, CoordinateModel, GeocodeModel
 from src.services.geocode import GeocodeClass
+from src.utils.utils import sort_location_by_distance
 
 
 app = APIRouter()
@@ -61,7 +62,7 @@ async def geocode_multiple_location_aiohttp(
         return await asyncio.gather(*tasks)
 
 
-@app.post("/async-geocode-thread")
+@app.post("/async-geocode-thread", response_model=List[CoordinateModel])
 async def geocode_multiple_location_thread(
        request: BatchGeocodeModel 
 ):  
@@ -69,7 +70,8 @@ async def geocode_multiple_location_thread(
     response = await GeocodeClass().geocode_with_thread_pool(request.locations)
     end_time = start_time - time.time()
     print(end_time)
-    return response
+    data = sort_location_by_distance(response)
+    return data
 
 if __name__ == "__main__":
     uvicorn.run(app=app, port=8000, reload=True)

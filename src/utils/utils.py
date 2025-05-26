@@ -11,3 +11,9 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     radius_km = 6371
     return radius_km * c
 
+
+
+def sort_location_by_distance(locations):
+    sorted_locations = sorted(locations, key=lambda x: x["distance_from_user_km"])
+    return sorted_locations
+# print(haversine_distance(lat1, lon1, lat2, lon2))
