@@ -15,3 +15,4 @@ class CoordinateModel(BaseModel):
     location: str
     longitude: float
     latitude: float
+    distance_from_user_km: float

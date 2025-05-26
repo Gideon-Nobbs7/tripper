@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Location</title>
+</head>
+<body>
+  <button onclick="sendLocation()">Send My Location</button>
+  <div id="status"></div>
+
+  <script>
+    async function sendLocation() {
+      if (!navigator.geolocation) {
+        document.getElementById('status').textContent = "Geolocation not supported.";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          const response = await fetch("http://localhost:8000/api/set-user-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ latitude: lat, longitude: lng })
+          });
+
+          const data = await response.json();
+          document.getElementById("status").textContent = `Sent: ${JSON.stringify(data)}`;
+        } catch (err) {
+          document.getElementById("status").textContent = "Failed to send location.";
+          console.error(err);
+        }
+      }, (err) => {
+        document.getElementById("status").textContent = "Permission denied or error.";
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>

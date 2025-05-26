@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get Location</title>
+</head>
+<body>
+  <div id="locationResult">Detecting your location...</div>
+
+  <script>
+    async function getCurrentPosition(options = {}) {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation not supported"));
+        } else {
+          navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        }
+      });
+    }
+
+    async function getStartingLocation() {
+      // Step 1: Try device location
+      try {
+        const position = await getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // <- Force fresh position
+        });
+
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        const response = await fetch('/api/set-user-location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lng,
+            source: 'device_location'
+          })
+        });
+
+        const data = await response.json();
+
+        return {
+          lat: lat,
+          lng: lng,
+          source: data.source || 'device_location'
+        };
+      } catch (error) {
+        console.warn("Device location failed or denied. Falling back to backend...");
+      }
+
+      // Step 2: Fallback to backend for IP-based location
+      try {
+        const response = await fetch('/api/set-user-location', {
+          method: 'POST'
+        });
+
+        const data = await response.json();
+
+        return {
+          lat: data.latitude,
+          lng: data.longitude,
+          source: data.source || 'ip_location'
+        };
+      } catch (error) {
+        console.error("Failed to get location from backend.");
+        return { error: "Unable to detect location." };
+      }
+    }
+
+    // Trigger when DOM is ready
+    document.addEventListener('DOMContentLoaded', async () => {
+      const location = await getStartingLocation();
+
+      if (location.error) {
+        document.getElementById('locationResult').innerText =
+          "We couldn't detect your location.";
+      } else {
+        document.getElementById('locationResult').innerText =
+          `Your location: ${location.lat}, ${location.lng} (Source: ${location.source})`;
+      }
+
+      console.log("User location:", location);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get User Location</title>
+</head>
+<body>
+  <h2>User Location Test</h2>
+  <p id="output">Loading...</p>
+
+  <script>
+    async function getUserLocation() {
+      const output = document.getElementById("output");
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            output.textContent = `Device location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+            await fetch("/api/set-user-location", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ latitude: lat, longitude: lng })
+            });
+          },
+          async (error) => {
+            console.log("Geolocation failed, using IP...");
+            await fallbackToIP();
+          }
+        );
+      } else {
+        output.textContent = "Geolocation not supported.";
+        await fallbackToIP();
+      }
+    }
+
+    async function fallbackToIP() {
+      const output = document.getElementById("output");
+
+      try {
+        const res = await fetch("http://ip-api.com/json/");
+        const data = await res.json();
+
+        if (data.status === "success") {
+          output.textContent = `IP-based location: ${data.lat.toFixed(5)}, ${data.lon.toFixed(5)}`;
+
+          await fetch("/api/set-user-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ latitude: data.lat, longitude: data.lon })
+          });
+        } else {
+          output.textContent = "Failed to get location from IP.";
+        }
+      } catch (err) {
+        output.textContent = "IP lookup failed.";
+        console.error(err);
+      }
+    }
+
+    // Call when page loads
+    getUserLocation();
+  </script>
+</body>
+</html>

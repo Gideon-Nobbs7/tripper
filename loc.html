@@ -1,0 +1,35 @@
+<!-- In your HTML -->
+<button onclick="getMyLocation()">Use My Current Location</button>
+<div id="locationResult"></div>
+
+<script>
+function getMyLocation() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Send to your Python backend
+                fetch('/api/set-user-location', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: lng
+                    })
+                });
+                
+                document.getElementById('locationResult').innerHTML = 
+                    `Your location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            },
+            function(error) {
+                document.getElementById('locationResult').innerHTML = 
+                    "Could not get your location. Please enter manually.";
+            }
+        );
+    } else {
+        alert("Geolocation not supported by this browser");
+    }
+}
+</script>
