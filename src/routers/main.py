@@ -4,18 +4,44 @@ from typing import List
 
 import aiohttp
 import uvicorn
-from fastapi import FastAPI, Query, APIRouter
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 
-from src.schema.schema import BatchGeocodeModel, CoordinateModel, GeocodeModel
+from src.database.config import get_db
+from src.schema.schema import BatchGeocodeModel, CoordinateModel, TripModel
 from src.services.geocode import GeocodeClass
 from src.utils.utils import sort_location_by_distance
 
+app = APIRouter(prefix="/api/v1")
 
-app = APIRouter()
+
+@app.post("/create", tags=["Trip"])
+async def create_trip(
+    trip: TripModel,
+    db: Session = Depends(get_db)
+):
+    query = text(
+        "INSERT INTO trip (name) VALUES (:name) " \
+        "RETURNING id, name, created_at"
+    )
+    result = db.execute(query, {"name": trip.name})
+    db.commit()
+    created_trip = result.fetchone()
+    print(type(created_trip))
+    
+    return {
+        "message": "Trip created",
+        "trip": {
+            "id": created_trip.id,
+            "name": created_trip.name,
+            "created_at": created_trip.created_at
+        }
+    }
 
 
 @app.get(
-    "/sync-geocode",
+    "/geocode",
     summary="Convert a location to its longitude and latitude",
     response_model=CoordinateModel,
     status_code=200,
@@ -62,7 +88,7 @@ async def geocode_multiple_location_aiohttp(
         return await asyncio.gather(*tasks)
 
 
-@app.post("/async-geocode-thread", response_model=List[CoordinateModel])
+@app.post("/multiplegeocode", response_model=List[CoordinateModel])
 async def geocode_multiple_location_thread(
        request: BatchGeocodeModel 
 ):  

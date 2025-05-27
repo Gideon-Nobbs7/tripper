@@ -1,4 +1,5 @@
-from math import radians, sin, cos, sqrt, atan2
+from math import atan2, cos, radians, sin, sqrt
+
 
 # Haversine formula to calculate distance
 def haversine_distance(lat1, lon1, lat2, lon2):

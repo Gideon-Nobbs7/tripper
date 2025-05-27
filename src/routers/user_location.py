@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse, HTMLResponse
-from pydantic import BaseModel
 import requests
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 
 user_loc = APIRouter()
 

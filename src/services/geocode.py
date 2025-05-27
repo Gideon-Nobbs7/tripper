@@ -7,7 +7,7 @@ from os import getenv
 from typing import List, Optional
 
 import aiohttp
-import httpx    
+import httpx
 from dotenv import load_dotenv
 
 from src.exceptions.exceptions import GeocodeError

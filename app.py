@@ -1,9 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.database.config import init_db
 from src.routers.main import app
 from src.routers.user_location import user_loc
-
 
 main_app = FastAPI()
 
@@ -17,6 +18,13 @@ main_app.add_middleware(
 
 main_app.include_router(app)
 main_app.include_router(user_loc)
+
+
+
+@main_app.on_event("startup")
+async def app_startup():
+    init_db()
+
 
 
 if __name__ == "__main__":
