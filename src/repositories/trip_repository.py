@@ -23,21 +23,26 @@ async def alter_trip(
     trip: TripUpdateRequest,
     db: Session
 ):
-    query = text(
-        "UPDATE trip" \
-        "SET name = :name" \
-        "WHERE id = :id"
-    )
+    # query = text(
+    #     "UPDATE trip" \
+    #     "SET name = :name" \
+    #     "WHERE id = :id"
+    # )
+    query = text("""
+        UPDATE trip
+        SET name = :name
+        WHERE id = :id
+        RETURNING id, name, created_at
+    """)
 
     result = db.execute(query, {
         "id": id,
         "name": trip.name
     })
-
+    updated_trip = result.mappings().fetchone()
     db.commit()
-    updated_trip = result.fetchone()
 
-    return updated_trip._asdict()
+    return updated_trip
 
 
 async def remove_trip(
@@ -69,11 +74,15 @@ async def trip_detail(
     #     "GROUP BY trip.id"
     # )
     query = text("""
-        SELECT trip.*, COUNT(destination.trip_id) AS destinations
+        SELECT trip.*, COUNT(destination.trip_id) AS count,
+        COALESCE(
+            JSON_AGG(destination.*) FILTER (WHERE destination.id IS NOT NULL),
+            '[]'
+        ) AS destinations
         FROM trip LEFT JOIN destination ON 
         trip.id = destination.trip_id
         WHERE trip.id = :id
-        GROUP BY trip.id     
+        GROUP BY trip.id
     """)
 
 
@@ -81,7 +90,5 @@ async def trip_detail(
         "id": id
     })
 
-    db.commit()
-    trip_details = result.fetchone()
-    print(trip_details._asdict())
-    return trip_details._asdict()
+    trip_details = result.mappings().fetchone()
+    return trip_details

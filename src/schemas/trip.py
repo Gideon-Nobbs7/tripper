@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+from src.schemas.geocode import DestinationResponse
 
 
 class TripCreateModel(BaseModel):
@@ -16,6 +17,7 @@ class TripResponse(BaseModel):
     id: int
     name: str
     created_at: datetime
+    # updated_at: Optional[datetime]
     destinations: Optional[int] = 0
 
 
@@ -23,7 +25,8 @@ class TripDetailResponse(BaseModel):
     id: int
     name: str
     created_at: datetime
-    destinations: List
+    count: Optional[int] = 0
+    destinations: List[DestinationResponse]
 
 
 class TripListResponse(BaseModel):
