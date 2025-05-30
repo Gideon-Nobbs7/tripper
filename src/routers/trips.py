@@ -6,10 +6,23 @@ from src.schemas.trip import *
 from src.database.config import get_db
 
 
-router = APIRouter(prefix="/api/v1/trips", tags=["Trips"])
+trips_route = APIRouter(prefix="/api/v1/trips", tags=["Trips"])
 
 
-@router.post(
+@trips_route.get(
+    "/{trip_id}/",
+    response_model=TripDetailResponse,
+    status_code=200
+)
+async def retrive_trip(
+    trip_id: int,
+    db: Session = Depends(get_db)
+):
+    trip = await trip_detail(trip_id, db)
+    return trip
+
+
+@trips_route.post(
     "/create", 
     response_model=TripResponse,
     status_code=201
@@ -22,7 +35,7 @@ async def create_trip(
     return created_trip
 
 
-@router.put(
+@trips_route.put(
     "/{trip_id}/update",
     response_model=TripResponse,
     status_code=200
@@ -36,7 +49,7 @@ async def update_trip(
     return updated_trip
 
 
-@router.delete(
+@trips_route.delete(
     "/{trip_id}/delete",
     status_code=200
 )

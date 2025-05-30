@@ -61,13 +61,21 @@ async def trip_detail(
     id: int,
     db: Session
 ):
-    query = text(
-        "SELECT trip.*, COUNT(destination.trip_id) AS destinations" \
-        "FROM trip JOIN destination ON" \
-        "trip.id = destination.trip_id" \
-        "WHERE id = :id" \
-        "GROUP BY trip.id"
-    )
+    # query = text(
+    #     "SELECT trip.*, COUNT(destination.trip_id) AS destinations " \
+    #     "FROM trip JOIN destination ON " \
+    #     "trip.id = destination.trip_id " \
+    #     "WHERE id = :id" \
+    #     "GROUP BY trip.id"
+    # )
+    query = text("""
+        SELECT trip.*, COUNT(destination.trip_id) AS destinations
+        FROM trip LEFT JOIN destination ON 
+        trip.id = destination.trip_id
+        WHERE trip.id = :id
+        GROUP BY trip.id     
+    """)
+
 
     result = db.execute(query, {
         "id": id
@@ -75,5 +83,5 @@ async def trip_detail(
 
     db.commit()
     trip_details = result.fetchone()
-
+    print(trip_details._asdict())
     return trip_details._asdict()

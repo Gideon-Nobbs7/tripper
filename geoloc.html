@@ -27,14 +27,14 @@
           maximumAge: 300000 // <- Force fresh position
         });
 
-        const lat = position.coords.latitude;
+        const lat = position.coords.lattitude;
         const lng = position.coords.longitude;
 
         const response = await fetch('/api/set-user-location', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            latitude: lat,
+            lattitude: lat,
             longitude: lng,
             source: 'device_location'
           })
@@ -60,7 +60,7 @@
         const data = await response.json();
 
         return {
-          lat: data.latitude,
+          lat: data.lattitude,
           lng: data.longitude,
           source: data.source || 'ip_location'
         };

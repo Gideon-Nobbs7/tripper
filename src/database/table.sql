@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS destination(
     id SERIAL PRIMARY KEY,
     location VARCHAR(50) NOT NULL,
     longitude FLOAT NOT NULL,
-    latitude FLOAT NOT NULL,
+    lattitude FLOAT NOT NULL,
     distance_from_user FLOAT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     trip_id INTEGER REFERENCES trip(id)

@@ -24,20 +24,20 @@ async def add_destination(
     trip_id: int,
     location: str,
     longitude: float,
-    latitude: float,
+    lattitude: float,
     distance_from_user_km: float,
 ):
     query = text(
         "INSERT INTO destination " \
-        "(location, longitude, latitude, distance_from_user_km, trip_id)" \
+        "(location, longitude, lattitude, distance_from_user_km, trip_id)" \
         "VALUES" \
-        "(:location, :longitude, :latitude, :distance_from_user_km, :trip_id)" \
-        "RETURNING location, longitude, latitude, distance_from_user_km" 
+        "(:location, :longitude, :lattitude, :distance_from_user_km, :trip_id)" \
+        "RETURNING location, longitude, lattitude, distance_from_user_km" 
     )
     result = db.execute(query, {
         "location": location,
         "longitude": longitude,
-        "latitude": latitude,
+        "lattitude": lattitude,
         "distance_from_user_km": distance_from_user_km,
         "trip_id": trip_id
     })

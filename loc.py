@@ -6,14 +6,14 @@
 # @app.route('/api/set-user-location', methods=['POST'])
 # def set_user_location():
 #     data = request.json
-#     user_lat = data['latitude']
+#     user_lat = data['lattitude']
 #     user_lng = data['longitude']
 
 #     session = {}
     
 #     # Store user location for trip planning
 #     session['user_location'] = {
-#         'latitude': user_lat,
+#         'lattitude': user_lat,
 #         'longitude': user_lng
 #     }
     
@@ -32,7 +32,7 @@
 # #     print(data)
     
 # #     return {
-# #         'latitude': data['lat'],
+# #         'lattitude': data['lat'],
 # #         'longitude': data['lon'],
 # #         'city': data['city'],
 # #         'country': data['country']

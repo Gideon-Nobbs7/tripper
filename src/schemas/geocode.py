@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -11,7 +11,7 @@ class GeocodeRequest(BaseModel):
 class CoordinateResponse(BaseModel):
     location: str
     longitude: float
-    latitude: float
+    lattitude: float
     distance_from_user_km: float
 
 
@@ -25,15 +25,15 @@ class BatchGeocodeResponse(BaseModel):
 
 
 class DestinationCreateRequest(BaseModel):
-    destination: str = Field(..., description="A destination to add to your trip")
-    trip_id: int = Field(..., description="A trip this destination belongs to")
+    location: str = Field(..., description="A location to add to your trip")
+    # trip_id: int = Field(..., description="A trip this destination belongs to")
 
 
 class DestinationResponse(BaseModel):
     id: int
     location: str
     longitude: float
-    latitude: float
+    lattitude: float
     distance_from_user_km: float
     trip_id: int
     created_at: datetime

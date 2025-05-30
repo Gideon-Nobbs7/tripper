@@ -3,8 +3,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.database.config import init_db
-from src.routers.main import app
-from src.routers.user_location import user_loc
+# from src.routers.main import app
+# from src.routers.user_location import user_loc
+from src.routers.trips import trips_route
+from src.routers.destination import router
 
 main_app = FastAPI()
 
@@ -16,8 +18,8 @@ main_app.add_middleware(
     allow_headers=["*"],
 )
 
-main_app.include_router(app)
-main_app.include_router(user_loc)
+main_app.include_router(router)
+main_app.include_router(trips_route)
 
 
 

@@ -7,7 +7,7 @@ function getMyLocation() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                const lat = position.coords.latitude;
+                const lat = position.coords.lattitude;
                 const lng = position.coords.longitude;
                 
                 // Send to your Python backend
@@ -15,7 +15,7 @@ function getMyLocation() {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        latitude: lat,
+                        lattitude: lat,
                         longitude: lng
                     })
                 });

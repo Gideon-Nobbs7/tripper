@@ -15,7 +15,7 @@
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
-            const lat = position.coords.latitude;
+            const lat = position.coords.lattitude;
             const lng = position.coords.longitude;
 
             output.textContent = `Device location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
@@ -23,7 +23,7 @@
             await fetch("/api/set-user-location", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ latitude: lat, longitude: lng })
+              body: JSON.stringify({ lattitude: lat, longitude: lng })
             });
           },
           async (error) => {
@@ -50,7 +50,7 @@
           await fetch("/api/set-user-location", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ latitude: data.lat, longitude: data.lon })
+            body: JSON.stringify({ lattitude: data.lat, longitude: data.lon })
           });
         } else {
           output.textContent = "Failed to get location from IP.";

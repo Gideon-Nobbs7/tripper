@@ -15,14 +15,14 @@
       }
 
       navigator.geolocation.getCurrentPosition(async (position) => {
-        const lat = position.coords.latitude;
+        const lat = position.coords.lattitude;
         const lng = position.coords.longitude;
 
         try {
           const response = await fetch("http://localhost:8000/api/set-user-location", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ latitude: lat, longitude: lng })
+            body: JSON.stringify({ lattitude: lat, longitude: lng })
           });
 
           const data = await response.json();

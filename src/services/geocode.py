@@ -50,19 +50,19 @@ class GeocodeClass:
             print("Data: ", data)
 
             longitude = float(data["longt"]) 
-            latitude = float(data["latt"])
+            lattitude = float(data["latt"])
 
-            if longitude == 0.0 and latitude == 0.0:
+            if longitude == 0.0 and lattitude == 0.0:
                 raise GeocodeError(
                     "No valid coordinates returned for the location. Try adding a city or country separated by comma"
                 )
             
-            distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
+            distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
             
             return {
                 "location": location,
                 "longitude": longitude,
-                "latitude": latitude,
+                "lattitude": lattitude,
                 "distance_from_user_km": distance,
                 "status": "success"
             }
@@ -92,17 +92,17 @@ class GeocodeClass:
                 
                 data = await response.json()
                 longitude = float(data["longt"])
-                latitude = float(data["latt"])
+                lattitude = float(data["latt"])
 
-                if longitude == 0.0 and latitude == 0.0:
+                if longitude == 0.0 and lattitude == 0.0:
                     raise GeocodeError(f"No valid coordinates returned for location {location}")
                 
-                distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
+                distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
                 
                 return {
                     "location": location,
                     "longitude": longitude,
-                    "latitude": latitude,
+                    "lattitude": lattitude,
                     "distance_from_user_km": distance,
                     "status": "success"
                 }
@@ -110,7 +110,7 @@ class GeocodeClass:
             return {
                 "location": location,
                 "longitude": None,
-                "latitude": None,
+                "lattitude": None,
                 "status": "error",
                 "error": str(e)
             }
