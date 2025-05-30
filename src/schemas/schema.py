@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class TripModel(BaseModel):
-    name: str
+    name: str = Field("A name for your trip")
+
 
 class GeocodeModel(BaseModel):
     location: str = Field("Enter a location to geocode", examples=["Amalitech, Kumasi, Ghana"])

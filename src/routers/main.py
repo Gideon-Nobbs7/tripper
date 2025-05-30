@@ -5,52 +5,54 @@ from typing import List
 import aiohttp
 import uvicorn
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from src.database.config import get_db
-from src.schema.schema import BatchGeocodeModel, CoordinateModel, TripModel
+from src.routers.helper_func import add_destination, new_trip
+from src.schemas.schema import BatchGeocodeModel, CoordinateModel, TripModel
 from src.services.geocode import GeocodeClass
 from src.utils.utils import sort_location_by_distance
 
 app = APIRouter(prefix="/api/v1")
 
 
-@app.post("/create", tags=["Trip"])
+@app.post(
+    "/create", 
+    tags=["Trip"], 
+    response_model=TripModel,
+    status_code=201
+)
 async def create_trip(
     trip: TripModel,
     db: Session = Depends(get_db)
 ):
-    query = text(
-        "INSERT INTO trip (name) VALUES (:name) " \
-        "RETURNING id, name, created_at"
-    )
-    result = db.execute(query, {"name": trip.name})
-    db.commit()
-    created_trip = result.fetchone()
-    print(type(created_trip))
-    
-    return {
-        "message": "Trip created",
-        "trip": {
-            "id": created_trip.id,
-            "name": created_trip.name,
-            "created_at": created_trip.created_at
-        }
-    }
+    created_trip = await new_trip(trip, db)
+    return created_trip
 
 
 @app.get(
-    "/geocode",
+    "/{trip_id}/geocode",
     summary="Convert a location to its longitude and latitude",
     response_model=CoordinateModel,
     status_code=200,
 )
-def geocode_location(
-    location: str = Query(..., description="E.g. 'Amalitech, Kumasi, Ghana'")
+async def geocode_location(
+    trip_id: int,
+    location: str = Query(..., description="E.g. 'Amalitech, Kumasi, Ghana'"),
+    db: Session = Depends(get_db)
 ):
     response = GeocodeClass().get_coordinates_for_address(location)
-    return response
+    print("Response: ", response)
+    result = await add_destination(
+        db=db,
+        trip_id=trip_id,
+        location=location,
+        longitude=response["longitude"],
+        latitude=response["latitude"],
+        distance_from_user_km=response["distance_from_user_km"]
+    )
+    return result
 
 
 @app.post(

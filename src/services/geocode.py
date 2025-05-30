@@ -50,19 +50,19 @@ class GeocodeClass:
             print("Data: ", data)
 
             longitude = float(data["longt"]) 
-            lattitude = float(data["latt"])
+            latitude = float(data["latt"])
 
-            if longitude == 0.0 and lattitude == 0.0:
+            if longitude == 0.0 and latitude == 0.0:
                 raise GeocodeError(
                     "No valid coordinates returned for the location. Try adding a city or country separated by comma"
                 )
             
-            distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
+            distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
             
             return {
                 "location": location,
                 "longitude": longitude,
-                "latitude": lattitude,
+                "latitude": latitude,
                 "distance_from_user_km": distance,
                 "status": "success"
             }
