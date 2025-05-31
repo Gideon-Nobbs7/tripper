@@ -1,6 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from src.schemas.geocode import *
 
 
 async def add_destination(
@@ -34,3 +35,38 @@ async def add_destination(
         return result_dict
     else:
         return None
+    
+
+async def retrieve_destination(
+    destination_id: int,
+    db: Session
+):
+    query = text("""
+        SELECT destination.* FROM destination
+        LEFT JOIN trip ON
+        destination.trip_id = trip.id
+        WHERE destination.id = :id
+        GROUP BY destination.id
+    """)
+
+    result = db.execute(query, {
+        "id": destination_id
+    })
+
+    details = result.mappings().fetchone()
+    return details
+
+
+async def remove_destination(
+    destination_id: int,
+    db: Session
+):
+    query = text("""
+        DELETE FROM destination
+        WHERE id = :id
+    """)
+
+    result = db.execute(query, {
+        "id": destination_id,
+    })
+    db.commit()

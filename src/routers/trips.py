@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from src.database.config import get_db
 from src.repositories.trip_repository import *
 from src.schemas.trip import *
-from src.database.config import get_db
-
 
 trips_route = APIRouter(prefix="/api/v1/trips", tags=["Trips"])
 

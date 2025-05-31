@@ -23,11 +23,6 @@ async def alter_trip(
     trip: TripUpdateRequest,
     db: Session
 ):
-    # query = text(
-    #     "UPDATE trip" \
-    #     "SET name = :name" \
-    #     "WHERE id = :id"
-    # )
     query = text("""
         UPDATE trip
         SET name = :name

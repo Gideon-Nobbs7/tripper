@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from src.database.config import get_db
 from src.repositories.destination_repository import *
 from src.schemas.geocode import *
 from src.services.geocode import GeocodeClass
-from src.database.config import get_db
-
 
 router = APIRouter(prefix="/api/v1/destination", tags=["Destinations"])
 
@@ -33,3 +32,27 @@ async def create_destination(
     )
 
     return result
+
+
+@router.get(
+    "/{destination_id}",
+    response_model=DestinationResponse
+)
+async def get_destination(
+    destination_id: int,
+    db: Session = Depends(get_db) 
+):
+    result = await retrieve_destination(destination_id, db)
+    return result
+
+
+@router.delete(
+    "/{destination_id}",
+)
+async def delete_destination(
+    destination_id: int,
+    db: Session = Depends(get_db)
+):
+    result = await remove_destination(destination_id, db)
+    print(result)
+    return {"message":"Destination deleted successfully"}

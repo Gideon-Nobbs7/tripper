@@ -3,10 +3,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.database.config import init_db
+from src.routers.destination import router
 # from src.routers.main import app
 # from src.routers.user_location import user_loc
 from src.routers.trips import trips_route
-from src.routers.destination import router
 
 main_app = FastAPI()
 
