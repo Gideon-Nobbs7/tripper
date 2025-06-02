@@ -11,6 +11,7 @@ import httpx
 from dotenv import load_dotenv
 
 from src.exceptions.exceptions import GeocodeError
+from src.schemas.geocode import BatchGeocodeResponse
 from src.utils.utils import haversine_distance
 
 load_dotenv()
@@ -54,7 +55,7 @@ class GeocodeClass:
 
             if longitude == 0.0 and lattitude == 0.0:
                 raise GeocodeError(
-                    "No valid coordinates returned for the location. Try adding a city or country separated by comma"
+                    f"No valid coordinates returned for the location {location}. Try adding a city or country separated by comma"
                 )
             
             distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
@@ -122,9 +123,22 @@ class GeocodeClass:
         locations: List[str]
     ):
         loop = asyncio.get_event_loop()
+
+        results = []
+        failed = []
         with ThreadPoolExecutor(max_workers=5) as executor:
             tasks = [
                 loop.run_in_executor(executor, self.get_coordinates_for_address, location)
                 for location in locations
             ]
-            return await asyncio.gather(*tasks)
+            responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for location, response in zip(locations, responses):
+                if isinstance(response, Exception):
+                    print(f"Failed to geocode {location}: {response}")
+                    failed.append(location)
+                else:
+                    results.append(response)
+
+        return BatchGeocodeResponse(results=results, failed=failed)
+

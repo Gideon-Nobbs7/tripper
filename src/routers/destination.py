@@ -5,6 +5,7 @@ from src.database.config import get_db
 from src.repositories.destination_repository import *
 from src.schemas.geocode import *
 from src.services.geocode import GeocodeClass
+from src.utils.utils import sort_location_by_distance
 
 router = APIRouter(prefix="/api/v1/destination", tags=["Destinations"])
 
@@ -56,3 +57,42 @@ async def delete_destination(
     result = await remove_destination(destination_id, db)
     print(result)
     return {"message":"Destination deleted successfully"}
+
+
+@router.post(
+    "/{trip_id}/batch",
+    response_model=BatchGeocodeResponse,
+    status_code=201
+)
+async def create_batch_destinations(
+    trip_id: int,
+    destinations: BatchGeocodeRequest,
+    db: Session = Depends(get_db)
+):
+    responses = await GeocodeClass().geocode_with_thread_pool(
+        destinations.locations
+    )
+    results = []
+    # print("Response: ", response)
+    for response in responses.results:
+        print(f"Response type: {type(response)}")
+        print(f"Response content: {response}")
+        result = await add_destination(
+            db=db,
+            trip_id=trip_id,
+            location=response.location,
+            longitude=response.longitude,
+            lattitude=response.lattitude,
+            distance_from_user_km=response.distance_from_user_km
+        )
+        results.append(result)
+    
+    if responses.failed:
+        print(responses.failed)
+    
+    final_response = sort_location_by_distance(results)
+
+    return BatchGeocodeResponse(
+        results=final_response,
+        failed=responses.failed
+    )

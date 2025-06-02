@@ -15,20 +15,6 @@ class CoordinateResponse(BaseModel):
     distance_from_user_km: float
 
 
-class BatchGeocodeRequest(BaseModel):
-    locations: List[GeocodeRequest] = Field(..., description="A list of locations to geocode")
-
-
-class BatchGeocodeResponse(BaseModel):
-    results: List[CoordinateResponse]
-    failed: Optional[List[str]]
-
-
-class DestinationCreateRequest(BaseModel):
-    location: str = Field(..., description="A location to add to your trip")
-    # trip_id: int = Field(..., description="A trip this destination belongs to")
-
-
 class DestinationResponse(BaseModel):
     id: int
     location: str
@@ -37,3 +23,20 @@ class DestinationResponse(BaseModel):
     distance_from_user_km: float
     trip_id: int
     created_at: datetime
+    
+
+class DestinationCreateRequest(BaseModel):
+    location: str = Field(..., description="A location to add to your trip")
+    # trip_id: int = Field(..., description="A trip this destination belongs to")
+
+
+class BatchGeocodeRequest(BaseModel):
+    locations: List[str] = Field(..., description="A list of locations to geocode")
+
+
+class BatchGeocodeResponse(BaseModel):
+    results: List[CoordinateResponse]
+    failed: Optional[List[str]] = []
+
+
+
