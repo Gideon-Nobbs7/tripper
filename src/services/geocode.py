@@ -120,26 +120,54 @@ class GeocodeClass:
     # @staticmethod
     async def geocode_with_thread_pool(
         self,
-        locations: List[str]
+        locations: List[str],
+        max_retries_per_location: int = 1 
     ):
-        loop = asyncio.get_event_loop()
+        async def geocode_single_retry(location: str):
+            last_exception = None
+
+            for attempt in range(max_retries_per_location + 1):
+                try:
+                    if attempt > 0:
+                        await asyncio.sleep(0.5*attempt)
+
+                    loop = asyncio.get_event_loop()
+                    with ThreadPoolExecutor(max_workers=5) as executor:
+                        result = await loop.run_in_executor(
+                            executor,
+                            self.get_coordinates_for_address,
+                            location
+                        )
+                    return {"success": True, "result": result, "location": location}
+                
+                except Exception as e:
+                    last_exception = e
+                    if attempt < max_retries_per_location:
+                        print(f"Retry {attempt + 1} for {location}: {e}")
+                        continue
+            
+            return {"success": False, "error": str(last_exception), "location": location}
+        
+        tasks = [
+            geocode_single_retry(location) for location in locations
+        ]
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
 
         results = []
         failed = []
-        
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            tasks = [
-                loop.run_in_executor(executor, self.get_coordinates_for_address, location)
-                for location in locations
-            ]
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for location, response in zip(locations, responses):
-                if isinstance(response, Exception):
-                    print(f"Failed to geocode {location}: {response}")
-                    failed.append(location)
-                else:
-                    results.append(response)
+        # for location, response in zip(locations, responses):
+        #     if isinstance(response, Exception):
+        #         print(f"Failed to geocode {location}: {response}")
+        #         failed.append(location)
+        #     else:
+        #         results.append(response)
+        for response in responses:
+            if response["success"]:
+                results.append(response["result"])
+            else:
+                print(f"Failed to geocode {response["location"]} after retries: {response["error"]}")
+                failed.append(response["location"])
 
         return BatchGeocodeResponse(results=results, failed=failed)
 
