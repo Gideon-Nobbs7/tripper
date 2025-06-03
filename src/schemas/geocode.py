@@ -35,7 +35,7 @@ class BatchGeocodeRequest(BaseModel):
 
 
 class BatchGeocodeResponse(BaseModel):
-    results: List[CoordinateResponse]
+    results: List
     failed: Optional[List[str]] = []
 
 

@@ -73,17 +73,17 @@ async def create_batch_destinations(
         destinations.locations
     )
     results = []
-    # print("Response: ", response)
+
     for response in responses.results:
         print(f"Response type: {type(response)}")
         print(f"Response content: {response}")
         result = await add_destination(
             db=db,
             trip_id=trip_id,
-            location=response.location,
-            longitude=response.longitude,
-            lattitude=response.lattitude,
-            distance_from_user_km=response.distance_from_user_km
+            location=response.location if hasattr(response, 'location') else response["location"],
+            longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
+            lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
+            distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
         )
         results.append(result)
     
@@ -91,6 +91,7 @@ async def create_batch_destinations(
         print(responses.failed)
     
     final_response = sort_location_by_distance(results)
+    print("Results: ", results)
 
     return BatchGeocodeResponse(
         results=final_response,

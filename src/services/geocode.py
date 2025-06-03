@@ -126,6 +126,7 @@ class GeocodeClass:
 
         results = []
         failed = []
+        
         with ThreadPoolExecutor(max_workers=5) as executor:
             tasks = [
                 loop.run_in_executor(executor, self.get_coordinates_for_address, location)
