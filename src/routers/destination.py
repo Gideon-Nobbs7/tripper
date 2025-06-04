@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from src.database.config import get_db
@@ -97,3 +97,31 @@ async def create_batch_destinations(
         results=final_response,
         failed=responses.failed
     )
+
+
+# @router.post(
+#     "/{trip_id}/import-destinations"
+# )
+# async def import_destinations_from_csv(
+#     trip_id: int,
+#     db: Session = Depends(get_db),
+#     file_path: File = UploadFile(...)
+# ):
+#     file_results = await GeocodeClass().import_data_from_csv(file_path)
+#     print("File results: ", file_results)
+
+#     return file_results
+
+@router.post(
+    "/{trip_id}/import",
+    response_model=BatchGeocodeResponse,
+    status_code=201
+)
+async def import_destinations(
+    trip_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # temp_file = f"/tmp/{file.filename}"
+    response = await GeocodeClass().import_data_from_csv(file_path=file.filename)
+    print("Response from file: ", response)

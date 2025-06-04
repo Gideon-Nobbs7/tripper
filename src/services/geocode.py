@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import http.client
 import json
 import urllib.parse
@@ -12,7 +13,7 @@ from dotenv import load_dotenv
 
 from src.exceptions.exceptions import GeocodeError
 from src.schemas.geocode import BatchGeocodeResponse
-from src.utils.utils import haversine_distance
+from src.utils.utils import haversine_distance, sort_location_by_distance
 
 load_dotenv()
 
@@ -168,6 +169,25 @@ class GeocodeClass:
             else:
                 print(f"Failed to geocode {response["location"]} after retries: {response["error"]}")
                 failed.append(response["location"])
+        
+        # sorted_results = sort_location_by_distance(re)
 
         return BatchGeocodeResponse(results=results, failed=failed)
 
+
+    async def import_data_from_csv(
+        self,
+        file_path: str
+    ):
+        all_rows = []
+
+        with open(file_path, mode="r") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                sanitized_row = ",".join(row)   
+                all_rows.append(sanitized_row)  
+
+        results = await self.geocode_with_thread_pool(all_rows) 
+        print("Results from csv: ", results)
+        return results  
+        
