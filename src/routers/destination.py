@@ -5,9 +5,15 @@ from src.database.config import get_db
 from src.repositories.destination_repository import *
 from src.schemas.geocode import *
 from src.services.geocode import GeocodeClass
+from src.services.destination import DestinationService
 from src.utils.utils import sort_location_by_distance
 
+
 router = APIRouter(prefix="/api/v1/destination", tags=["Destinations"])
+
+
+def get_destination_service():
+    return DestinationService()
 
 
 @router.post(
@@ -67,50 +73,43 @@ async def delete_destination(
 async def create_batch_destinations(
     trip_id: int,
     destinations: BatchGeocodeRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    destination_service: DestinationService = Depends(get_destination_service)
 ):
-    responses = await GeocodeClass().geocode_with_thread_pool(
-        destinations.locations
+    return await destination_service.create_batch_destinations(
+        db=db,
+        trip_id=trip_id,
+        locations=destinations
     )
-    results = []
+    # responses = await GeocodeClass().geocode_with_thread_pool(
+    #     destinations.locations
+    # )
+    # results = []
 
-    for response in responses.results:
-        print(f"Response type: {type(response)}")
-        print(f"Response content: {response}")
-        result = await add_destination(
-            db=db,
-            trip_id=trip_id,
-            location=response.location if hasattr(response, 'location') else response["location"],
-            longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
-            lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
-            distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
-        )
-        results.append(result)
+    # for response in responses.results:
+    #     print(f"Response type: {type(response)}")
+    #     print(f"Response content: {response}")
+    #     result = await add_destination(
+    #         db=db,
+    #         trip_id=trip_id,
+    #         location=response.location if hasattr(response, 'location') else response["location"],
+    #         longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
+    #         lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
+    #         distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
+    #     )
+    #     results.append(result)
     
-    if responses.failed:
-        print(responses.failed)
+    # if responses.failed:
+    #     print(responses.failed)
     
-    final_response = sort_location_by_distance(results)
-    print("Results: ", results)
+    # final_response = sort_location_by_distance(results)
+    # print("Results: ", results)
 
-    return BatchGeocodeResponse(
-        results=final_response,
-        failed=responses.failed
-    )
+    # return BatchGeocodeResponse(
+    #     results=final_response,
+    #     failed=responses.failed
+    # )
 
-
-# @router.post(
-#     "/{trip_id}/import-destinations"
-# )
-# async def import_destinations_from_csv(
-#     trip_id: int,
-#     db: Session = Depends(get_db),
-#     file_path: File = UploadFile(...)
-# ):
-#     file_results = await GeocodeClass().import_data_from_csv(file_path)
-#     print("File results: ", file_results)
-
-#     return file_results
 
 @router.post(
     "/{trip_id}/import",
@@ -123,5 +122,17 @@ async def import_destinations(
     db: Session = Depends(get_db)
 ):
     # temp_file = f"/tmp/{file.filename}"
-    response = await GeocodeClass().import_data_from_csv(file_path=file.filename)
-    print("Response from file: ", response)
+    responses = await GeocodeClass().import_data_from_csv(file_path=file.filename)
+    print("Response from file: ", responses)
+    
+    for response in responses.results:
+        result = await add_destination(
+            db=db,
+            trip_id=trip_id,
+            location=response.location if hasattr(response, 'location') else response["location"],
+            longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
+            lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
+            distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
+        )
+    
+    return responses
