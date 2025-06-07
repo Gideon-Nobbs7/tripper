@@ -17,11 +17,14 @@ class DestinationService:
         trip_id: int,
         db: Session,
         geocode_responses: Any
-    ):
+    ) -> BatchGeocodeResponse:
         results = []
 
         for response in geocode_responses.results:
             # destination_data = self._extract_destination_data(response)
+            print("Geocde results: ", geocode_responses.results)
+            print("Response type: ", type(response))
+            print("Response: ", response)
 
             try:
                 result = await add_destination(
@@ -60,6 +63,7 @@ class DestinationService:
         locations: List[str]
     ):
         geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations)
+        print("Thread pool response: ", geocode_responses)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 

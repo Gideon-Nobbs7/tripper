@@ -153,6 +153,7 @@ class GeocodeClass:
             geocode_single_retry(location) for location in locations
         ]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
+        print("Responses: ", responses)
 
         results = []
         failed = []
@@ -165,11 +166,12 @@ class GeocodeClass:
         #         results.append(response)
         for response in responses:
             if response["success"]:
+                print("Response[result]: ", response["result"])
                 results.append(response["result"])
             else:
                 print(f"Failed to geocode {response["location"]} after retries: {response["error"]}")
-                failed.append(response["location"])
-        
+                failed.append(response["location"]) 
+            
         # sorted_results = sort_location_by_distance(re)
 
         return BatchGeocodeResponse(results=results, failed=failed)

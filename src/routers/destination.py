@@ -70,7 +70,7 @@ async def delete_destination(
     response_model=BatchGeocodeResponse,
     status_code=201
 )
-async def create_batch_destinations(
+async def create_batch_destinations_route(
     trip_id: int,
     destinations: BatchGeocodeRequest,
     db: Session = Depends(get_db),
@@ -79,7 +79,7 @@ async def create_batch_destinations(
     return await destination_service.create_batch_destinations(
         db=db,
         trip_id=trip_id,
-        locations=destinations
+        locations=destinations.locations
     )
     # responses = await GeocodeClass().geocode_with_thread_pool(
     #     destinations.locations
