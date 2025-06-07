@@ -36,7 +36,6 @@ class GeocodeClass:
             "json": 1,
             "moreinfo": 1
         }
-        print(payload["locate"])
         params = urllib.parse.urlencode(payload)
 
         try:
@@ -49,7 +48,6 @@ class GeocodeClass:
             response = res.read()
 
             data = json.loads(response.decode("utf-8"))
-            print("Data: ", data)
 
             longitude = float(data["longt"]) 
             lattitude = float(data["latt"])
@@ -70,7 +68,6 @@ class GeocodeClass:
             }
         except Exception as e:
             raise GeocodeError(str(e))
-        # print(response.decode("utf-8"))    
 
 
 
@@ -153,7 +150,6 @@ class GeocodeClass:
             geocode_single_retry(location) for location in locations
         ]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
-        print("Responses: ", responses)
 
         results = []
         failed = []
@@ -190,6 +186,5 @@ class GeocodeClass:
                 all_rows.append(sanitized_row)  
 
         results = await self.geocode_with_thread_pool(all_rows) 
-        print("Results from csv: ", results)
         return results  
         

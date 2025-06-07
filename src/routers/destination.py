@@ -24,21 +24,14 @@ def get_destination_service():
 async def create_destination(
     trip_id: int,
     destination: DestinationCreateRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    destination_service: DestinationService = Depends(get_destination_service)
 ):
-    response = GeocodeClass().get_coordinates_for_address(
-        destination.location
-    )
-    result = await add_destination(
-        db=db,
+    return await destination_service.process_single_destination(
         trip_id=trip_id,
-        location=destination.location,
-        longitude=response["longitude"],
-        lattitude=response["lattitude"],
-        distance_from_user_km=response["distance_from_user_km"]
+        db=db,
+        location=destination.location
     )
-
-    return result
 
 
 @router.get(
@@ -61,7 +54,6 @@ async def delete_destination(
     db: Session = Depends(get_db)
 ):
     result = await remove_destination(destination_id, db)
-    print(result)
     return {"message":"Destination deleted successfully"}
 
 
@@ -119,20 +111,11 @@ async def create_batch_destinations_route(
 async def import_destinations(
     trip_id: int,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    destination_service: DestinationService = Depends(get_destination_service)
 ):
-    # temp_file = f"/tmp/{file.filename}"
-    responses = await GeocodeClass().import_data_from_csv(file_path=file.filename)
-    print("Response from file: ", responses)
-    
-    for response in responses.results:
-        result = await add_destination(
-            db=db,
-            trip_id=trip_id,
-            location=response.location if hasattr(response, 'location') else response["location"],
-            longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
-            lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
-            distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
-        )
-    
-    return responses
+    return await destination_service.import_destinations_from_file(
+        trip_id=trip_id,
+        db=db,
+        file_path=file.filename
+    )

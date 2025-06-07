@@ -7,9 +7,35 @@ from src.schemas.geocode import BatchGeocodeResponse
 from src.services.geocode import GeocodeClass
 from src.utils.utils import sort_location_by_distance
 
+
 class DestinationService:
     def __init__(self):
         self.geocode_service = GeocodeClass()
+
+    
+    async def process_single_destination(
+        self,
+        trip_id: int,
+        db: Session,
+        location: str
+    ):
+        response = self.geocode_service.get_coordinates_for_address(
+            location=location
+        )
+
+        try:
+            result = await add_destination(
+                db=db,
+                trip_id=trip_id,
+                location=location,
+                longitude=response["longitude"],
+                lattitude=response["lattitude"],
+                distance_from_user_km=response["distance_from_user_km"]
+            )
+        except Exception as e:
+            raise DatabaseError(f"Failed to add destination {location}: {str(e)}")
+        
+        return result
 
 
     async def process_batch_destinations(
@@ -21,11 +47,6 @@ class DestinationService:
         results = []
 
         for response in geocode_responses.results:
-            # destination_data = self._extract_destination_data(response)
-            print("Geocde results: ", geocode_responses.results)
-            print("Response type: ", type(response))
-            print("Response: ", response)
-
             try:
                 result = await add_destination(
                     db,
@@ -63,7 +84,6 @@ class DestinationService:
         locations: List[str]
     ):
         geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations)
-        print("Thread pool response: ", geocode_responses)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 

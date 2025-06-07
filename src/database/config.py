@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.exceptions.exceptions import DatabaseError
 
+
 load_dotenv()
 
 
@@ -16,6 +17,7 @@ print(main_dir)
 
 DATABASE_URI = getenv("DATABASE_URI")
 engine = create_engine(DATABASE_URI)
+
 
 SessionLocal = sessionmaker(
     bind=engine,
@@ -31,7 +33,8 @@ def get_db():
     finally:
         db.close()
 
-def init_db():
+
+def init_db(engine):
     sql_path = f"{main_dir}/table.sql"
 
     try:
