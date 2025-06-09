@@ -5,7 +5,7 @@ from src.exceptions.exceptions import DatabaseError
 from src.repositories.destination_repository import add_destination
 from src.schemas.geocode import BatchGeocodeResponse
 from src.services.geocode import GeocodeClass
-from src.utils.utils import sort_location_by_distance
+from src.utils.utils import sort_location_by_distance, haversine_distance
 
 
 class DestinationService:
@@ -49,8 +49,8 @@ class DestinationService:
         for response in geocode_responses.results:
             try:
                 result = await add_destination(
-                    db,
-                    trip_id,
+                    db=db,
+                    trip_id=trip_id,
                     location=response.location if hasattr(response, 'location') else response["location"],
                     longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
                     lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
@@ -85,6 +85,31 @@ class DestinationService:
     ):
         geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
+    
+
+    async def create_manual_destinations(
+        self,
+        db: Session,
+        trip_id: int,
+        location: str,
+        longitude: float,
+        lattitude: float,
+    ):
+        distance_from_user_km = haversine_distance(5.5545, -0.1902, longitude, lattitude)
+
+        try:
+            result = await add_destination(
+                db=db,
+                trip_id=trip_id,
+                location=location,
+                longitude=longitude,
+                lattitude=lattitude,
+                distance_from_user_km=distance_from_user_km
+            )
+        except Exception as e:
+            raise DatabaseError(f"Failed to add destination for {location}: {str(e)}")
+        
+        return result
     
 
     async def import_destinations_from_file(

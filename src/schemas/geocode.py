@@ -39,4 +39,7 @@ class BatchGeocodeResponse(BaseModel):
     failed: Optional[List[str]] = []
 
 
-
+class ManualDestinationCreateRequest(BaseModel):
+    location: str
+    longitude: float
+    lattitude: float

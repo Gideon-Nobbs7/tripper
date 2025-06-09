@@ -36,7 +36,8 @@ async def create_destination(
 
 @router.get(
     "/{destination_id}",
-    response_model=DestinationResponse
+    response_model=DestinationResponse,
+    status_code=200
 )
 async def get_destination(
     destination_id: int,
@@ -48,6 +49,7 @@ async def get_destination(
 
 @router.delete(
     "/{destination_id}",
+    status_code=200
 )
 async def delete_destination(
     destination_id: int,
@@ -101,6 +103,24 @@ async def create_batch_destinations_route(
     #     results=final_response,
     #     failed=responses.failed
     # )
+
+
+@router.post(
+    "/{trip_id}/new/manual",
+    response_model=DestinationResponse,
+    status_code=201
+)
+async def create_manual_destination(
+    trip_id: int,
+    destination: ManualDestinationCreateRequest,
+    db: Session = Depends(get_db),
+    destination_service: DestinationService = Depends(get_destination_service)
+):
+    return await destination_service.create_manual_destinations(
+        db=db,
+        trip_id=trip_id,
+        **destination.model_dump()
+    )
 
 
 @router.post(
