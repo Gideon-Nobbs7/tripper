@@ -35,6 +35,25 @@ async def create_destination(
 
 
 @router.get(
+    "/{trip_id}/all",
+    response_model=List[DestinationResponse],
+    status_code=200
+)
+async def get_all_destinations(
+    trip_id: int,
+    db: Session = Depends(get_db) 
+):
+    result = await get_all_destinations(trip_id, db)
+
+    if not result:
+        raise HTTPException(
+            status_code=404, detail=f"There are not destinations for this trip"
+        )
+    
+    return result
+
+
+@router.get(
     "/{destination_id}",
     response_model=DestinationResponse,
     status_code=200
@@ -44,6 +63,12 @@ async def get_destination(
     db: Session = Depends(get_db) 
 ):
     result = await retrieve_destination(destination_id, db)
+
+    if not result:
+        raise HTTPException(
+            status_code=404, detail=f"Destination with id {destination_id} not found"
+        )
+    
     return result
 
 

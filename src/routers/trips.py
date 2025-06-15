@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.database.config import get_db
 from src.repositories.trip_repository import *
 from src.schemas.trip import *
+
 
 trips_route = APIRouter(prefix="/api/v1/trips", tags=["Trips"])
 
@@ -18,7 +19,29 @@ async def retrive_trip(
     db: Session = Depends(get_db)
 ):
     trip = await trip_detail(trip_id, db)
+
+    if not trip:
+        raise HTTPException(
+            status_code=404, detail=f"Trip with id {trip_id} not found"
+        )
     return trip
+
+
+@trips_route.get(
+    "/",
+    response_model=List[TripResponse],
+    status_code=200
+)
+async def get_all_trips(
+    db: Session = Depends(get_db)
+):
+    trips = await all_trips(db)
+
+    if not trips:
+        raise HTTPException(
+            status_code=404, detail=f"There are no trips"
+        )
+    return trips
 
 
 @trips_route.post(
@@ -26,7 +49,7 @@ async def retrive_trip(
     response_model=TripResponse,
     status_code=201
 )
-async def create_trip(
+async def create_new_trip(
     trip: TripCreateModel,
     db: Session = Depends(get_db)
 ):

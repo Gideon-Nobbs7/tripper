@@ -12,6 +12,10 @@ async def create_trip(
         "INSERT INTO trip (name) VALUES (:name) " \
         "RETURNING id, name, created_at"
     )
+    # query = text(""""
+    #     INSERT INTO trip (name) VALUES (:name)
+    #     RETURNING id, name, created_at
+    # """)
     result = db.execute(query, {"name":trip.name})
     db.commit()
     new_trip = result.fetchone()
@@ -57,17 +61,23 @@ async def remove_trip(
     return result.fetchone()
 
 
+async def all_trips(
+    db: Session
+):
+    query = text("""
+        SELECT * FROM trip
+    """)
+
+    result = db.execute(query)
+
+    trips = result.fetchall()
+    return trips
+
+
 async def trip_detail(
     id: int,
     db: Session
 ):
-    # query = text(
-    #     "SELECT trip.*, COUNT(destination.trip_id) AS destinations " \
-    #     "FROM trip JOIN destination ON " \
-    #     "trip.id = destination.trip_id " \
-    #     "WHERE id = :id" \
-    #     "GROUP BY trip.id"
-    # )
     query = text("""
         SELECT trip.*, COUNT(destination.trip_id) AS count,
         COALESCE(
@@ -79,7 +89,6 @@ async def trip_detail(
         WHERE trip.id = :id
         GROUP BY trip.id
     """)
-
 
     result = db.execute(query, {
         "id": id
