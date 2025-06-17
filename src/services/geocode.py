@@ -12,7 +12,7 @@ import httpx
 from dotenv import load_dotenv
 
 from src.exceptions.exceptions import GeocodeError
-from src.schemas.geocode import BatchGeocodeResponse
+from src.schemas.geocode import BatchGeocodeResponse, Location
 from src.utils.utils import haversine_distance, sort_location_by_distance
 
 load_dotenv()
@@ -22,7 +22,7 @@ class GeocodeClass:
     def __init__(self):
         self.auth = getenv("AUTH_KEY")
 
-    def get_coordinates_for_address(self, location: str):
+    def get_coordinates_for_address(self, location: str, user_lat: float, user_lon: float):
         conn = http.client.HTTPSConnection("geocode.xyz")
 
         # cleaned_location = location.strip()
@@ -57,7 +57,8 @@ class GeocodeClass:
                     f"No valid coordinates returned for the location {location}. Try adding a city or country separated by comma"
                 )
             
-            distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
+            # distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
+            distance = haversine_distance(user_lat, user_lon, lattitude, longitude)
             
             return {
                 "location": location,

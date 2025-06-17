@@ -17,10 +17,14 @@ class DestinationService:
         self,
         trip_id: int,
         db: Session,
-        location: str
+        location: str,
+        user_lat: float,
+        user_lon: float
     ):
         response = self.geocode_service.get_coordinates_for_address(
-            location=location
+            location=location,
+            user_lat=user_lat,
+            user_lon=user_lon
         )
 
         try:

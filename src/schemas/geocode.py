@@ -27,6 +27,8 @@ class DestinationResponse(BaseModel):
 
 class DestinationCreateRequest(BaseModel):
     location: str = Field(..., description="A location to add to your trip")
+    lattitude: float
+    longitude: float
     # trip_id: int = Field(..., description="A trip this destination belongs to")
 
 
@@ -43,3 +45,8 @@ class ManualDestinationCreateRequest(BaseModel):
     location: str
     longitude: float
     lattitude: float
+
+
+class Location(BaseModel):
+    lattitude: float
+    longitude: float

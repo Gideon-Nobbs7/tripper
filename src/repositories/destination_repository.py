@@ -81,7 +81,7 @@ async def all_destinations(
     """)
 
     result = db.execute(query, {
-        "id": trip_id
+        "trip_id": trip_id
     })
 
     details = result.fetchall()

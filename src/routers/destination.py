@@ -30,7 +30,9 @@ async def create_destination(
     return await destination_service.process_single_destination(
         trip_id=trip_id,
         db=db,
-        location=destination.location
+        location=destination.location,
+        user_lat=destination.lattitude,
+        user_lon=destination.longitude
     )
 
 
@@ -43,7 +45,7 @@ async def get_all_destinations(
     trip_id: int,
     db: Session = Depends(get_db) 
 ):
-    result = await get_all_destinations(trip_id, db)
+    result = await all_destinations(trip_id, db)
 
     if not result:
         raise HTTPException(
