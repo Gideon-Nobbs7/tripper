@@ -33,7 +33,7 @@ async def create_trip(
 
 @app.get(
     "/{trip_id}/geocode",
-    summary="Convert a location to its longitude and lattitude",
+    summary="Convert a location to its longitude and latitude",
     response_model=CoordinateModel,
     status_code=200,
 )
@@ -49,7 +49,7 @@ async def geocode_location(
         trip_id=trip_id,
         location=location,
         longitude=response["longitude"],
-        lattitude=response["lattitude"],
+        latitude=response["latitude"],
         distance_from_user_km=response["distance_from_user_km"]
     )
     return result

@@ -7,18 +7,18 @@ user_loc = APIRouter()
 
 
 class LocationData(BaseModel):
-    lattitude: float
+    latitude: float
     longitude: float
 
 
 @user_loc.post("/api/set-user-location")
 async def set_user_location(request: Request):
     data = await request.json()
-    lat = data.get("lattitude")
+    lat = data.get("latitude")
     lng = data.get("longitude")
 
     print(f"Received from browser: {lat}, {lng}")
-    return JSONResponse(content={"status": "success", "lattitude": lat, "longitude": lng})
+    return JSONResponse(content={"status": "success", "latitude": lat, "longitude": lng})
 
 
 @user_loc.get("/", response_class=HTMLResponse)

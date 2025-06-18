@@ -11,7 +11,7 @@ class GeocodeRequest(BaseModel):
 class CoordinateResponse(BaseModel):
     location: str
     longitude: float
-    lattitude: float
+    latitude: float
     distance_from_user_km: float
 
 
@@ -19,7 +19,7 @@ class DestinationResponse(BaseModel):
     id: int
     location: str
     longitude: float
-    lattitude: float
+    latitude: float
     distance_from_user_km: float
     trip_id: int
     created_at: datetime
@@ -27,7 +27,7 @@ class DestinationResponse(BaseModel):
 
 class DestinationCreateRequest(BaseModel):
     location: str = Field(..., description="A location to add to your trip")
-    lattitude: float
+    latitude: float
     longitude: float
     # trip_id: int = Field(..., description="A trip this destination belongs to")
 
@@ -44,9 +44,14 @@ class BatchGeocodeResponse(BaseModel):
 class ManualDestinationCreateRequest(BaseModel):
     location: str
     longitude: float
-    lattitude: float
+    latitude: float
 
 
 class Location(BaseModel):
-    lattitude: float
+    latitude: float
+    longitude: float
+
+
+class Coordinates(BaseModel):
+    latitude: float
     longitude: float

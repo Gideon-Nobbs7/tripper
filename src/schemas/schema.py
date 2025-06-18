@@ -18,5 +18,5 @@ class BatchGeocodeModel(BaseModel):
 class CoordinateModel(BaseModel):
     location: str
     longitude: float
-    lattitude: float
+    latitude: float
     distance_from_user_km: float

@@ -1,0 +1,10 @@
+docker pull redis:7-alpine
+
+
+docker pull prom/prometheus:latest
+
+
+docker pull oliver006/redis_exporter:latest
+
+
+docker pull grafana/grafana:latest

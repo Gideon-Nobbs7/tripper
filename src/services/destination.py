@@ -33,7 +33,7 @@ class DestinationService:
                 trip_id=trip_id,
                 location=location,
                 longitude=response["longitude"],
-                lattitude=response["lattitude"],
+                latitude=response["latitude"],
                 distance_from_user_km=response["distance_from_user_km"]
             )
         except Exception as e:
@@ -57,7 +57,7 @@ class DestinationService:
                     trip_id=trip_id,
                     location=response.location if hasattr(response, 'location') else response["location"],
                     longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
-                    lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
+                    latitude=response.latitude if hasattr(response, 'latitude') else response["latitude"],
                     distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
                 )
                 results.append(result)
@@ -76,7 +76,7 @@ class DestinationService:
         return {
             "location": getattr(response, "location", None) or response["location"],
             "longitude": getattr(response, "longitude", None) or response["longitude"],
-            "lattitude": getattr(response, "lattitude", None) or response["lattitude"],
+            "latitude": getattr(response, "latitude", None) or response["latitude"],
             "distance_from_user_km": getattr(response, "distance_from_user_km", None) or response["distance_from_user_km"],
         }
     
@@ -85,9 +85,11 @@ class DestinationService:
         self, 
         db: Session,
         trip_id: int,
-        locations: List[str]
+        locations: List[str],
+        user_lat: float,
+        user_lon: float
     ):
-        geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations)
+        geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations, user_lat, user_lon)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 
@@ -97,9 +99,9 @@ class DestinationService:
         trip_id: int,
         location: str,
         longitude: float,
-        lattitude: float,
+        latitude: float,
     ):
-        distance_from_user_km = haversine_distance(5.5545, -0.1902, longitude, lattitude)
+        distance_from_user_km = haversine_distance(5.5545, -0.1902, longitude, latitude)
 
         try:
             result = await add_destination(
@@ -107,7 +109,7 @@ class DestinationService:
                 trip_id=trip_id,
                 location=location,
                 longitude=longitude,
-                lattitude=lattitude,
+                latitude=latitude,
                 distance_from_user_km=distance_from_user_km
             )
         except Exception as e:

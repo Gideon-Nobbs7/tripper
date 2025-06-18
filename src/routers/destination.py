@@ -27,11 +27,12 @@ async def create_destination(
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
+    
     return await destination_service.process_single_destination(
         trip_id=trip_id,
         db=db,
         location=destination.location,
-        user_lat=destination.lattitude,
+        user_lat=destination.latitude,
         user_lon=destination.longitude
     )
 
@@ -94,13 +95,16 @@ async def delete_destination(
 async def create_batch_destinations_route(
     trip_id: int,
     destinations: BatchGeocodeRequest,
+    coordinates: Coordinates,
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
     return await destination_service.create_batch_destinations(
         db=db,
         trip_id=trip_id,
-        locations=destinations.locations
+        locations=destinations.locations,
+        user_lat=coordinates.latitude,
+        user_lon=coordinates.longitude
     )
     # responses = await GeocodeClass().geocode_with_thread_pool(
     #     destinations.locations
@@ -115,7 +119,7 @@ async def create_batch_destinations_route(
     #         trip_id=trip_id,
     #         location=response.location if hasattr(response, 'location') else response["location"],
     #         longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
-    #         lattitude=response.lattitude if hasattr(response, 'lattitude') else response["lattitude"],
+    #         latitude=response.latitude if hasattr(response, 'latitude') else response["latitude"],
     #         distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
     #     )
     #     results.append(result)

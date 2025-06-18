@@ -50,20 +50,20 @@ class GeocodeClass:
             data = json.loads(response.decode("utf-8"))
 
             longitude = float(data["longt"]) 
-            lattitude = float(data["latt"])
+            latitude = float(data["latt"])
 
-            if longitude == 0.0 and lattitude == 0.0:
+            if longitude == 0.0 and latitude == 0.0:
                 raise GeocodeError(
                     f"No valid coordinates returned for the location {location}. Try adding a city or country separated by comma"
                 )
             
-            # distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
-            distance = haversine_distance(user_lat, user_lon, lattitude, longitude)
+            # distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
+            distance = haversine_distance(user_lat, user_lon, latitude, longitude)
             
             return {
                 "location": location,
                 "longitude": longitude,
-                "lattitude": lattitude,
+                "latitude": latitude,
                 "distance_from_user_km": distance,
                 "status": "success"
             }
@@ -92,17 +92,17 @@ class GeocodeClass:
                 
                 data = await response.json()
                 longitude = float(data["longt"])
-                lattitude = float(data["latt"])
+                latitude = float(data["latt"])
 
-                if longitude == 0.0 and lattitude == 0.0:
+                if longitude == 0.0 and latitude == 0.0:
                     raise GeocodeError(f"No valid coordinates returned for location {location}")
                 
-                distance = haversine_distance(5.5545, -0.1902, lattitude, longitude)
+                distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
                 
                 return {
                     "location": location,
                     "longitude": longitude,
-                    "lattitude": lattitude,
+                    "latitude": latitude,
                     "distance_from_user_km": distance,
                     "status": "success"
                 }
@@ -110,7 +110,7 @@ class GeocodeClass:
             return {
                 "location": location,
                 "longitude": None,
-                "lattitude": None,
+                "latitude": None,
                 "status": "error",
                 "error": str(e)
             }
@@ -120,6 +120,8 @@ class GeocodeClass:
     async def geocode_with_thread_pool(
         self,
         locations: List[str],
+        user_lat: float,
+        user_lon: float,
         max_retries_per_location: int = 1 
     ):
         async def geocode_single_retry(location: str):
@@ -135,7 +137,7 @@ class GeocodeClass:
                         result = await loop.run_in_executor(
                             executor,
                             self.get_coordinates_for_address,
-                            location
+                            location, user_lat, user_lon
                         )
                     return {"success": True, "result": result, "location": location}
                 
