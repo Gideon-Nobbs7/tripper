@@ -178,6 +178,8 @@ class GeocodeClass:
 
     async def import_data_from_csv(
         self,
+        user_lat: float,
+        user_lon: float,
         file_path: str
     ):
         all_rows = []
@@ -188,6 +190,6 @@ class GeocodeClass:
                 sanitized_row = ",".join(row)   
                 all_rows.append(sanitized_row)  
 
-        results = await self.geocode_with_thread_pool(all_rows) 
+        results = await self.geocode_with_thread_pool(all_rows, user_lat, user_lon) 
         return results  
         

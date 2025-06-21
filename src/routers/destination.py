@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, Form, Query
 from sqlalchemy.orm import Session
 
 from src.database.config import get_db
@@ -99,13 +99,15 @@ async def create_batch_destinations_route(
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
-    return await destination_service.create_batch_destinations(
+    result = await destination_service.create_batch_destinations(
         db=db,
         trip_id=trip_id,
         locations=destinations.locations,
         user_lat=coordinates.latitude,
         user_lon=coordinates.longitude
     )
+    print(result)
+    return result
     # responses = await GeocodeClass().geocode_with_thread_pool(
     #     destinations.locations
     # )
@@ -137,7 +139,7 @@ async def create_batch_destinations_route(
 
 
 @router.post(
-    "/{trip_id}/new/manual",
+    "/{trip_id}/add/manual",
     response_model=DestinationResponse,
     status_code=201
 )
@@ -160,13 +162,18 @@ async def create_manual_destination(
     status_code=201
 )
 async def import_destinations(
+    file: UploadFile,
     trip_id: int,
-    file: UploadFile = File(...),
+    # coordinates: Coordinates,
+    user_lat: float = Query(...),
+    user_lon: float = Query(...),
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
     return await destination_service.import_destinations_from_file(
         trip_id=trip_id,
         db=db,
-        file_path=file.filename
+        user_lat=user_lat,
+        user_lon=user_lon,
+        file_path=file.filename,
     )

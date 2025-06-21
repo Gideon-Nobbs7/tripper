@@ -55,3 +55,6 @@ class Location(BaseModel):
 class Coordinates(BaseModel):
     latitude: float
     longitude: float
+
+    class Config:
+        from_attributes = True

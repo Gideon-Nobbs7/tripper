@@ -114,15 +114,16 @@ class DestinationService:
             )
         except Exception as e:
             raise DatabaseError(f"Failed to add destination for {location}: {str(e)}")
-        
         return result
     
 
     async def import_destinations_from_file(
         self,
         trip_id: int,
+        user_lat: float,
+        user_lon: float,
         db: Session,
         file_path: str
     ):
-        geocode_responses = await self.geocode_service.import_data_from_csv(file_path)
+        geocode_responses = await self.geocode_service.import_data_from_csv(user_lat, user_lon, file_path)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
