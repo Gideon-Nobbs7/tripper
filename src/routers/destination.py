@@ -9,7 +9,7 @@ from src.services.destination import DestinationService
 from src.utils.utils import sort_location_by_distance
 
 
-router = APIRouter(prefix="/trips/{trip_id}/destination", tags=["Destinations"])
+router = APIRouter(prefix="/trips/{trip_id}/destinations", tags=["Destinations"])
 
 
 def get_destination_service():
@@ -55,39 +55,8 @@ async def list_trip_destinations(
     return destinations
 
 
-@router.get(
-    "/{destination_id}",
-    response_model=DestinationResponse,
-    status_code=200
-)
-async def get_destination(
-    destination_id: int,
-    destination_service: DestinationService = Depends(get_destination_service),
-    db: Session = Depends(get_db) 
-):
-    destination = await destination_service.get_destination_by_id(destination_id, db)
-    if not destination:
-        raise HTTPException(
-            status_code=404, detail=f"Destination with id {destination_id} not found"
-        )
-    return destination
-
-
-@router.delete(
-    "/{destination_id}",
-    status_code=200
-)
-async def delete_destination(
-    destination_id: int,
-    destination_service: DestinationService = Depends(get_destination_service),
-    db: Session = Depends(get_db)
-):
-    success = await destination_service.delete_destination(destination_id, db)
-    return {"message": "Destination deleted successfully"}
-
-
 @router.post(
-    "/{trip_id}/batch",
+    "/batch",
     response_model=BatchGeocodeResponse,
     status_code=201
 )
@@ -190,7 +159,7 @@ async def get_sorted_destinations(
     destination_service: DestinationService = Depends(get_destination_service),
     db: Session = Depends(get_db)
 ):
-    sorted_destinations = destination_service.get_sorted_destinations(
+    sorted_destinations = await destination_service.get_sorted_destinations(
         trip_id=trip_id,
         user_lat=user_lat,
         user_lon=user_lon,
@@ -199,3 +168,35 @@ async def get_sorted_destinations(
     if not sorted_destinations:
         return []
     return sorted_destinations
+
+
+@router.get(
+    "/{destination_id}",
+    response_model=DestinationResponse,
+    status_code=200
+)
+async def get_destination(
+    destination_id: int,
+    destination_service: DestinationService = Depends(get_destination_service),
+    db: Session = Depends(get_db) 
+):
+    destination = await destination_service.get_destination_by_id(destination_id, db)
+    if not destination:
+        raise HTTPException(
+            status_code=404, detail=f"Destination with id {destination_id} not found"
+        )
+    return destination
+
+
+@router.delete(
+    "/{destination_id}",
+    status_code=200
+)
+async def delete_destination(
+    destination_id: int,
+    destination_service: DestinationService = Depends(get_destination_service),
+    db: Session = Depends(get_db)
+):
+    success = await destination_service.delete_destination(destination_id, db)
+    return {"message": "Destination deleted successfully"}
+

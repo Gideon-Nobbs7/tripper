@@ -21,8 +21,8 @@ main_app.add_middleware(
     allow_headers=["*"],
 )
 
-main_app.include_router(router, prefix="/api/v1", tags=["Trips"])
-main_app.include_router(trips_route, prefix="/api/v1", tags=["Destinations"])
+main_app.include_router(router, prefix="/api/v1")
+main_app.include_router(trips_route, prefix="/api/v1")
 
 
 

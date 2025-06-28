@@ -7,12 +7,13 @@ import time
 
 from src.schemas.geocode import *
 
+
 add_destination_counter = Counter("add_destination", "Rate destinations are added")
 add_destination_duration = Histogram("add_destination_time", "Time taken to add a new destination")
 
 
-
 class DestinationRepository:
+
     async def create_destination(
         self,
         db: Session,
@@ -49,7 +50,6 @@ class DestinationRepository:
                 return result_dict
             else:
                 return None
-        
         finally:
             duration = time.time() - start_time
             add_destination_duration.observe(duration)
@@ -67,16 +67,14 @@ class DestinationRepository:
             WHERE destination.id = :id
             GROUP BY destination.id
         """)
-
         result = db.execute(query, {
             "id": destination_id
         })
-
         details = result.mappings().fetchone()
         return details
 
 
-    async def list_trip_destinations(
+    async def list_destinations_for_trip(
         self,
         trip_id: int,
         db: Session
@@ -85,12 +83,11 @@ class DestinationRepository:
             SELECT destination.* FROM destination
             WHERE destination.trip_id = :trip_id
         """)
-
         result = db.execute(query, {
             "trip_id": trip_id
         })
-
         details = result.fetchall()
+        print("Type of fetched details:...", type(details))
         return details
 
 
@@ -103,7 +100,6 @@ class DestinationRepository:
             DELETE FROM destination
             WHERE id = :id
         """)
-
         result = db.execute(query, {
             "id": destination_id,
         })

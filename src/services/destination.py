@@ -142,7 +142,7 @@ class DestinationService:
         trip_id: int,
         db: Session
     ):
-        destinations = await DestinationRepository().list_destinations(trip_id, db)
+        destinations = await DestinationRepository().list_trip_destinations(trip_id, db)
         return destinations
     
 
@@ -161,16 +161,18 @@ class DestinationService:
         user_lon: float,
         db: Session
     ):
-        db_destinations = await DestinationRepository().list_destinations(trip_id, db)
+        db_destinations = await DestinationRepository().list_destinations_for_trip(trip_id, db)
+
+        destionations_dict = [dest._asdict() for dest in db_destinations]
         
         destinations_with_distance = []
-        for dest in db_destinations:
+        for dest in destionations_dict:
             if dest["latitude"] is not None and dest["longitude"] is not None:
                 distance = haversine_distance(user_lat, user_lon, dest["latitude"], dest["longitude"])
                 dest["distance_from_user"] = distance
                 destinations_with_distance.append(dest)
         
         destinations_with_distance.sort(key=lambda d: d["distance_from_user"])
-
+        
         return destinations_with_distance
 
