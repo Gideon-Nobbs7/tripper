@@ -42,7 +42,7 @@ async def geocode_location(
     location: str = Query(..., description="E.g. 'Amalitech, Kumasi, Ghana'"),
     db: Session = Depends(get_db)
 ):
-    response = GeocodeClass().get_coordinates_for_address(location)
+    response = GeocodeClass().get_coordinates_for_destination(location)
     print("Response: ", response)
     result = await add_destination(
         db=db,
@@ -66,7 +66,7 @@ def batch_coordinates(request: BatchGeocodeModel):
     start_time = time.time()
     
     for address in request.locations:
-        result = GeocodeClass().get_coordinates_for_address(address)
+        result = GeocodeClass().get_coordinates_for_destination(address)
         results.append(result)
         end_time = start_time - time.time()
         print(end_time)

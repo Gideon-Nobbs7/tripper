@@ -1,0 +1,4 @@
+Get and Sort Destinations using Haversine equation
+-- Save only latitude and longitude
+-- Remove distance_from_user_km
+-- Pass a user's coordinates to calculate the haversine equation to sort every destination 

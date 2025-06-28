@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Any, List
 
 from src.exceptions.exceptions import DatabaseError
-from src.repositories.destination_repository import add_destination
+from src.repositories.destination_repository import add_destination, all_destinations
 from src.schemas.geocode import BatchGeocodeResponse
 from src.services.geocode import GeocodeClass
 from src.utils.utils import sort_location_by_distance, haversine_distance
@@ -21,7 +21,7 @@ class DestinationService:
         user_lat: float,
         user_lon: float
     ):
-        response = self.geocode_service.get_coordinates_for_address(
+        response = self.geocode_service.get_coordinates_for_destination(
             location=location,
             user_lat=user_lat,
             user_lon=user_lon
@@ -127,3 +127,25 @@ class DestinationService:
     ):
         geocode_responses = await self.geocode_service.import_data_from_csv(user_lat, user_lon, file_path)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
+    
+
+    async def get_sorted_destinations(
+        self,
+        trip_id: int,
+        user_lat: float,
+        user_lon: float,
+        db: Session
+    ):
+        db_destinations = await all_destinations(trip_id, db)
+        
+        destinations_with_distance = []
+        for dest in db_destinations:
+            if dest["latitude"] is not None and dest["longitude"] is not None:
+                distance = haversine_distance(user_lat, user_lon, dest["latitude"], dest["longitude"])
+                dest["distance_from_user"] = distance
+                destinations_with_distance.append(dest)
+        
+        destinations_with_distance.sort(key=lambda d: d["distance_from_user"])
+
+        return destinations_with_distance
+

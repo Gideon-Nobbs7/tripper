@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 
 from src.database.config import get_db
 from src.repositories.trip_repository import *
+from src.repositories.destination_repository import all_destinations
 from src.schemas.trip import *
+from src.services.destination import DestinationService
+from src.routers.destination import get_destination_service
 
 
 trips_route = APIRouter(prefix="/api/v1/trips", tags=["Trips"])
@@ -81,3 +84,23 @@ async def delete_trip(
 ):
     removed_trip = await remove_trip(trip_id, db)
     return {"message": "Deleted successfully"}
+
+
+@trips_route.get(
+    "/{trip_id}/destinations",
+    response_model=List[DestinationResponse],
+    status_code=200
+)
+async def get_all_destinations(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    destination_service: DestinationService = Depends(get_destination_service)
+):
+    result = await destination_service.get_sorted_destination()
+
+    if not result:
+        raise HTTPException(
+            status_code=404, detail=f"There are not destinations for this trip"
+        )
+    
+    return result

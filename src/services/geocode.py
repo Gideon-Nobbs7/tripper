@@ -22,7 +22,7 @@ class GeocodeClass:
     def __init__(self):
         self.auth = getenv("AUTH_KEY")
 
-    def get_coordinates_for_address(self, location: str, user_lat: float, user_lon: float):
+    def get_coordinates_for_destination(self, location: str, user_lat: float, user_lon: float):
         conn = http.client.HTTPSConnection("geocode.xyz")
 
         # cleaned_location = location.strip()
@@ -136,7 +136,7 @@ class GeocodeClass:
                     with ThreadPoolExecutor(max_workers=5) as executor:
                         result = await loop.run_in_executor(
                             executor,
-                            self.get_coordinates_for_address,
+                            self.get_coordinates_for_destination,
                             location, user_lat, user_lon
                         )
                     return {"success": True, "result": result, "location": location}
