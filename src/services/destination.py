@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Any, List
 
 from src.exceptions.exceptions import DatabaseError
-from src.repositories.destination_repository import add_destination, all_destinations
+from src.repositories.destination_repository import DestinationRepository
 from src.schemas.geocode import BatchGeocodeResponse
 from src.services.geocode import GeocodeClass
 from src.utils.utils import sort_location_by_distance, haversine_distance
@@ -28,7 +28,7 @@ class DestinationService:
         )
 
         try:
-            result = await add_destination(
+            result = await DestinationRepository().add_destination(
                 db=db,
                 trip_id=trip_id,
                 location=location,
@@ -52,7 +52,7 @@ class DestinationService:
 
         for response in geocode_responses.results:
             try:
-                result = await add_destination(
+                result = await DestinationRepository().add_destination(
                     db=db,
                     trip_id=trip_id,
                     location=response.location if hasattr(response, 'location') else response["location"],
@@ -104,7 +104,7 @@ class DestinationService:
         distance_from_user_km = haversine_distance(5.5545, -0.1902, longitude, latitude)
 
         try:
-            result = await add_destination(
+            result = await DestinationRepository().add_destination(
                 db=db,
                 trip_id=trip_id,
                 location=location,
@@ -129,6 +129,31 @@ class DestinationService:
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 
+    async def get_destination_by_id(
+        self,
+        destination_id: int,
+        db: Session
+    ):
+        return await DestinationRepository().get_destination(destination_id, db)
+
+
+    async def get_destinations_for_trip(
+        self,
+        trip_id: int,
+        db: Session
+    ):
+        destinations = await DestinationRepository().list_destinations(trip_id, db)
+        return destinations
+    
+
+    async def delete_destination(
+        self,
+        destination_id: int,
+        db: Session
+    ):
+        return await DestinationRepository().delete_destination(destination_id, db)
+
+
     async def get_sorted_destinations(
         self,
         trip_id: int,
@@ -136,7 +161,7 @@ class DestinationService:
         user_lon: float,
         db: Session
     ):
-        db_destinations = await all_destinations(trip_id, db)
+        db_destinations = await DestinationRepository().list_destinations(trip_id, db)
         
         destinations_with_distance = []
         for dest in db_destinations:

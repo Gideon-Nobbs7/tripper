@@ -9,7 +9,7 @@ from src.services.destination import DestinationService
 from src.utils.utils import sort_location_by_distance
 
 
-router = APIRouter(prefix="/api/v1/destination", tags=["Destinations"])
+router = APIRouter(prefix="/trips/{trip_id}/destination", tags=["Destinations"])
 
 
 def get_destination_service():
@@ -17,7 +17,7 @@ def get_destination_service():
 
 
 @router.post(
-    "/{trip_id}/new",
+    "/",
     response_model=DestinationResponse,
     status_code=201
 )
@@ -38,22 +38,21 @@ async def create_destination(
 
 
 @router.get(
-    "/{trip_id}/all",
+    "/",
     response_model=List[DestinationResponse],
     status_code=200
 )
-async def get_all_destinations(
+async def list_trip_destinations(
     trip_id: int,
+    destination_service: DestinationService = Depends(get_destination_service),
     db: Session = Depends(get_db) 
 ):
-    result = await all_destinations(trip_id, db)
-
-    if not result:
+    destinations = await destination_service.get_destinations_for_trip(trip_id, db)
+    if not destinations:
         raise HTTPException(
             status_code=404, detail=f"There are not destinations for this trip"
         )
-    
-    return result
+    return destinations
 
 
 @router.get(
@@ -63,16 +62,15 @@ async def get_all_destinations(
 )
 async def get_destination(
     destination_id: int,
+    destination_service: DestinationService = Depends(get_destination_service),
     db: Session = Depends(get_db) 
 ):
-    result = await retrieve_destination(destination_id, db)
-
-    if not result:
+    destination = await destination_service.get_destination_by_id(destination_id, db)
+    if not destination:
         raise HTTPException(
             status_code=404, detail=f"Destination with id {destination_id} not found"
         )
-    
-    return result
+    return destination
 
 
 @router.delete(
@@ -81,10 +79,11 @@ async def get_destination(
 )
 async def delete_destination(
     destination_id: int,
+    destination_service: DestinationService = Depends(get_destination_service),
     db: Session = Depends(get_db)
 ):
-    result = await remove_destination(destination_id, db)
-    return {"message":"Destination deleted successfully"}
+    success = await destination_service.delete_destination(destination_id, db)
+    return {"message": "Destination deleted successfully"}
 
 
 @router.post(
@@ -139,7 +138,7 @@ async def create_batch_destinations_route(
 
 
 @router.post(
-    "/{trip_id}/add/manual",
+    "/manual/",
     response_model=DestinationResponse,
     status_code=201
 )
@@ -157,7 +156,7 @@ async def create_manual_destination(
 
 
 @router.post(
-    "/{trip_id}/import",
+    "/import",
     response_model=BatchGeocodeResponse,
     status_code=201
 )
@@ -177,3 +176,26 @@ async def import_destinations(
         user_lon=user_lon,
         file_path=file.filename,
     )
+
+
+@router.get(
+    "/sorted",
+    response_model=List[DestinationResponse],
+    status_code=200
+)
+async def get_sorted_destinations(
+    trip_id: int,
+    user_lat: float = Query(..., description="User's current latitude for sorting destinations"),
+    user_lon: float = Query(..., description="User's current longitude for sorting destinations"),
+    destination_service: DestinationService = Depends(get_destination_service),
+    db: Session = Depends(get_db)
+):
+    sorted_destinations = destination_service.get_sorted_destinations(
+        trip_id=trip_id,
+        user_lat=user_lat,
+        user_lon=user_lon,
+        db=db
+    )
+    if not sorted_destinations:
+        return []
+    return sorted_destinations

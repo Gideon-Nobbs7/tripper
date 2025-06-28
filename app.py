@@ -21,14 +21,19 @@ main_app.add_middleware(
     allow_headers=["*"],
 )
 
-main_app.include_router(router)
-main_app.include_router(trips_route)
+main_app.include_router(router, prefix="/api/v1", tags=["Trips"])
+main_app.include_router(trips_route, prefix="/api/v1", tags=["Destinations"])
 
 
 
 @main_app.on_event("startup")
 async def app_startup():
     init_db(engine=engine)
+
+
+@main_app.get("/api/v1/healthcheck", tags=["Monitoring"])
+async def healthcheck():
+    return {"status": "ok", "message": "Tripper API is running"}
 
 
 
