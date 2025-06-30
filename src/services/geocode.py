@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 from src.exceptions.exceptions import GeocodeError
 from src.schemas.geocode import BatchGeocodeResponse, Location
-from src.utils.utils import haversine_distance, sort_location_by_distance
+from src.utils.utils import haversine_distance
 
 load_dotenv()
 
@@ -22,7 +22,7 @@ class GeocodeClass:
     def __init__(self):
         self.auth = getenv("AUTH_KEY")
 
-    def get_coordinates_for_destination(self, location: str, user_lat: float, user_lon: float):
+    def get_coordinates_for_destination(self, location: str):
         conn = http.client.HTTPSConnection("geocode.xyz")
 
         # cleaned_location = location.strip()
@@ -58,7 +58,7 @@ class GeocodeClass:
                 )
             
             # distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
-            distance = haversine_distance(user_lat, user_lon, latitude, longitude)
+            # distance = haversine_distance(user_lat, user_lon, latitude, longitude)
             
             return {
                 "location": location,
@@ -96,7 +96,7 @@ class GeocodeClass:
                 if longitude == 0.0 and latitude == 0.0:
                     raise GeocodeError(f"No valid coordinates returned for location {location}")
                 
-                distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
+                # distance = haversine_distance(5.5545, -0.1902, latitude, longitude)
                 
                 return {
                     "location": location,
@@ -118,8 +118,6 @@ class GeocodeClass:
     async def geocode_with_thread_pool(
         self,
         locations: List[str],
-        user_lat: float,
-        user_lon: float,
         max_retries_per_location: int = 1 
     ):
         async def geocode_single_retry(location: str):
@@ -135,7 +133,7 @@ class GeocodeClass:
                         result = await loop.run_in_executor(
                             executor,
                             self.get_coordinates_for_destination,
-                            location, user_lat, user_lon
+                            location,
                         )
                     return {"success": True, "result": result, "location": location}
                 
@@ -176,8 +174,6 @@ class GeocodeClass:
 
     async def import_data_from_csv(
         self,
-        user_lat: float,
-        user_lon: float,
         file_path: str
     ):
         all_rows = []
@@ -188,6 +184,6 @@ class GeocodeClass:
                 sanitized_row = ",".join(row)   
                 all_rows.append(sanitized_row)  
 
-        results = await self.geocode_with_thread_pool(all_rows, user_lat, user_lon) 
+        results = await self.geocode_with_thread_pool(all_rows) 
         return results  
         

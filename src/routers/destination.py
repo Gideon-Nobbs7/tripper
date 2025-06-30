@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from src.database.config import get_db
 from src.repositories.destination_repository import *
 from src.schemas.geocode import *
 from src.services.destination import DestinationService
-from src.services.geocode import GeocodeClass
+
 
 router = APIRouter(prefix="/trips/{trip_id}/destinations", tags=["Destinations"])
 
@@ -25,13 +25,10 @@ async def create_destination(
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
-    
     return await destination_service.process_single_destination(
         trip_id=trip_id,
         db=db,
         location=destination.location,
-        user_lat=destination.latitude,
-        user_lon=destination.longitude
     )
 
 
@@ -61,7 +58,6 @@ async def list_trip_destinations(
 async def create_batch_destinations_route(
     trip_id: int,
     destinations: BatchGeocodeRequest,
-    coordinates: Coordinates,
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
@@ -69,8 +65,6 @@ async def create_batch_destinations_route(
         db=db,
         trip_id=trip_id,
         locations=destinations.locations,
-        user_lat=coordinates.latitude,
-        user_lon=coordinates.longitude
     )
     return result
 
@@ -101,16 +95,12 @@ async def create_manual_destination(
 async def import_destinations(
     file: UploadFile,
     trip_id: int,
-    user_lat: float = Query(...),
-    user_lon: float = Query(...),
     db: Session = Depends(get_db),
     destination_service: DestinationService = Depends(get_destination_service)
 ):
     return await destination_service.import_destinations_from_file(
         trip_id=trip_id,
         db=db,
-        user_lat=user_lat,
-        user_lon=user_lon,
         file_path=file.filename,
     )
 
@@ -144,11 +134,12 @@ async def get_sorted_destinations(
     status_code=200
 )
 async def get_destination(
+    trip_id: int,
     destination_id: int,
     destination_service: DestinationService = Depends(get_destination_service),
     db: Session = Depends(get_db) 
 ):
-    destination = await destination_service.get_destination_by_id(destination_id, db)
+    destination = await destination_service.get_destination_by_id(trip_id, destination_id, db)
     if not destination:
         raise HTTPException(
             status_code=404, detail=f"Destination with id {destination_id} not found"

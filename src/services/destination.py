@@ -19,14 +19,8 @@ class DestinationService:
         trip_id: int,
         db: Session,
         location: str,
-        user_lat: float,
-        user_lon: float
     ):
-        response = self.geocode_service.get_coordinates_for_destination(
-            location=location,
-            user_lat=user_lat,
-            user_lon=user_lon
-        )
+        response = self.geocode_service.get_coordinates_for_destination(location=location)
 
         try:
             result = await DestinationRepository().add_destination(
@@ -52,7 +46,7 @@ class DestinationService:
 
         for response in geocode_responses.results:
             try:
-                result = await DestinationRepository().add_destination(
+                result = await DestinationRepository().create_destination(
                     db=db,
                     trip_id=trip_id,
                     location=response.location if hasattr(response, 'location') else response["location"],
@@ -82,10 +76,8 @@ class DestinationService:
         db: Session,
         trip_id: int,
         locations: List[str],
-        user_lat: float,
-        user_lon: float
     ):
-        geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations, user_lat, user_lon)
+        geocode_responses = await self.geocode_service.geocode_with_thread_pool(locations)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 
@@ -99,7 +91,7 @@ class DestinationService:
     ):
 
         try:
-            result = await DestinationRepository().add_destination(
+            result = await DestinationRepository().create_destination(
                 db=db,
                 trip_id=trip_id,
                 location=location,
@@ -114,21 +106,20 @@ class DestinationService:
     async def import_destinations_from_file(
         self,
         trip_id: int,
-        user_lat: float,
-        user_lon: float,
         db: Session,
         file_path: str
     ):
-        geocode_responses = await self.geocode_service.import_data_from_csv(user_lat, user_lon, file_path)
+        geocode_responses = await self.geocode_service.import_data_from_csv(file_path)
         return await self.process_batch_destinations(trip_id, db, geocode_responses)
     
 
     async def get_destination_by_id(
         self,
+        trip_id: int,
         destination_id: int,
         db: Session
     ):
-        return await DestinationRepository().get_destination(destination_id, db)
+        return await DestinationRepository().get_destination(trip_id, destination_id, db)
 
 
     async def get_destinations_for_trip(
@@ -136,7 +127,7 @@ class DestinationService:
         trip_id: int,
         db: Session
     ):
-        destinations = await DestinationRepository().list_trip_destinations(trip_id, db)
+        destinations = await DestinationRepository().list_destinations_for_trip(trip_id, db)
         return destinations
     
 

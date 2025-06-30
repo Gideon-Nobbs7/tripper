@@ -54,18 +54,20 @@ class DestinationRepository:
 
     async def get_destination(
         self,
+        trip_id: int,
         destination_id: int,
         db: Session
     ):
         query = text("""
             SELECT destination.* FROM destination
             LEFT JOIN trip ON
-            destination.trip_id = trip.id
-            WHERE destination.id = :id
+            destination.trip_id = :trip_id
+            WHERE destination.id = :destination_id
             GROUP BY destination.id
         """)
         result = db.execute(query, {
-            "id": destination_id
+            "trip_id": trip_id,
+            "destination_id": destination_id
         })
         details = result.mappings().fetchone()
         return details
