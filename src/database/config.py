@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 
 from src.exceptions.exceptions import DatabaseError
 
-
 load_dotenv()
 
 

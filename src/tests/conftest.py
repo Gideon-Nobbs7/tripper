@@ -1,12 +1,10 @@
 import pytest
-
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from ...app import main_app
+from ...main import app
 from ..database.config import get_db, init_db
-
 
 SQLALCHEMY_TEST_URL = "sqlite:///./test.db"
 
@@ -28,10 +26,10 @@ def override_get_db():
     finally:
         db.close()
 
-main_app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture
 def client():
-    with TestingSessionLocal(main_app) as c:
+    with TestingSessionLocal(app) as c:
         yield c

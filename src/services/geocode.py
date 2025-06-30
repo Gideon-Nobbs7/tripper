@@ -64,7 +64,6 @@ class GeocodeClass:
                 "location": location,
                 "longitude": longitude,
                 "latitude": latitude,
-                "distance_from_user_km": distance,
                 "status": "success"
             }
         except Exception as e:
@@ -103,7 +102,6 @@ class GeocodeClass:
                     "location": location,
                     "longitude": longitude,
                     "latitude": latitude,
-                    "distance_from_user_km": distance,
                     "status": "success"
                 }
         except Exception as e:

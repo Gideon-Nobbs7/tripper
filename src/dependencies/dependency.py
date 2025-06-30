@@ -2,7 +2,6 @@ from src.repositories.trip_repository import TripService
 from src.services.destination import DestinationService
 
 
-
 def get_trip_service():
     return TripService()
 

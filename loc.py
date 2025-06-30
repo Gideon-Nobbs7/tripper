@@ -1,4 +1,5 @@
 import csv
+
 all = []
 with open("data.csv", mode="r") as file:
     reader = csv.reader(file)

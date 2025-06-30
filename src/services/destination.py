@@ -1,11 +1,12 @@
-from sqlalchemy.orm import Session
 from typing import Any, List
+
+from sqlalchemy.orm import Session
 
 from src.exceptions.exceptions import DatabaseError
 from src.repositories.destination_repository import DestinationRepository
 from src.schemas.geocode import BatchGeocodeResponse
 from src.services.geocode import GeocodeClass
-from src.utils.utils import sort_location_by_distance, haversine_distance
+from src.utils.utils import haversine_distance
 
 
 class DestinationService:
@@ -34,7 +35,6 @@ class DestinationService:
                 location=location,
                 longitude=response["longitude"],
                 latitude=response["latitude"],
-                distance_from_user_km=response["distance_from_user_km"]
             )
         except Exception as e:
             raise DatabaseError(f"Failed to add destination {location}: {str(e)}")
@@ -58,16 +58,13 @@ class DestinationService:
                     location=response.location if hasattr(response, 'location') else response["location"],
                     longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
                     latitude=response.latitude if hasattr(response, 'latitude') else response["latitude"],
-                    distance_from_user_km=response.distance_from_user_km if hasattr(response, 'distance_from_user_km') else response["distance_from_user_km"]
                 )
                 results.append(result)
             except Exception as e:
                 raise DatabaseError(f"Failed to add destination")
         
-        sorted_results = sort_location_by_distance(results)
-
         return BatchGeocodeResponse(
-            results=sorted_results,
+            results=results,
             failed=geocode_responses.failed
         )
 
@@ -77,7 +74,6 @@ class DestinationService:
             "location": getattr(response, "location", None) or response["location"],
             "longitude": getattr(response, "longitude", None) or response["longitude"],
             "latitude": getattr(response, "latitude", None) or response["latitude"],
-            "distance_from_user_km": getattr(response, "distance_from_user_km", None) or response["distance_from_user_km"],
         }
     
 
@@ -101,7 +97,6 @@ class DestinationService:
         longitude: float,
         latitude: float,
     ):
-        distance_from_user_km = haversine_distance(5.5545, -0.1902, longitude, latitude)
 
         try:
             result = await DestinationRepository().add_destination(
@@ -110,7 +105,6 @@ class DestinationService:
                 location=location,
                 longitude=longitude,
                 latitude=latitude,
-                distance_from_user_km=distance_from_user_km
             )
         except Exception as e:
             raise DatabaseError(f"Failed to add destination for {location}: {str(e)}")

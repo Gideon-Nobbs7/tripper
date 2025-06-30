@@ -1,12 +1,11 @@
+import time
+
 from fastapi import HTTPException
 from prometheus_client import Counter, Histogram
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-import time
-
 from src.schemas.geocode import *
-
 
 add_destination_counter = Counter("add_destination", "Rate destinations are added")
 add_destination_duration = Histogram("add_destination_time", "Time taken to add a new destination")
@@ -21,7 +20,6 @@ class DestinationRepository:
         location: str,
         longitude: float,
         latitude: float,
-        distance_from_user_km: float,
     ):
         add_destination_counter.inc()
 
@@ -29,16 +27,15 @@ class DestinationRepository:
         try:
             query = text(
                 "INSERT INTO destination " \
-                "(location, longitude, latitude, distance_from_user_km, trip_id)" \
+                "(location, longitude, latitude, trip_id)" \
                 "VALUES" \
-                "(:location, :longitude, :latitude, :distance_from_user_km, :trip_id)" \
-                "RETURNING id, location, longitude, latitude, distance_from_user_km, trip_id, created_at" 
+                "(:location, :longitude, :latitude, :trip_id)" \
+                "RETURNING id, location, longitude, latitude, trip_id, created_at" 
             )
             result = db.execute(query, {
                 "location": location,
                 "longitude": longitude,
                 "latitude": latitude,
-                "distance_from_user_km": distance_from_user_km,
                 "trip_id": trip_id
             })
 
