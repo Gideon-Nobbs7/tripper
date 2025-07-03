@@ -11,6 +11,24 @@ router = APIRouter(prefix="/trips", tags=["Trips"])
 
 
 @router.get(
+    "/",
+    response_model=List[TripResponse],
+    status_code=200
+)
+async def list_trips(
+    trip_service: TripService = Depends(get_trip_service),
+    db: Session = Depends(get_db)
+):
+    trips = await trip_service.get_trips(db)
+
+    if not trips:
+        raise HTTPException(
+            status_code=404, detail=f"There are no trips"
+        )
+    return trips
+
+
+@router.get(
     "/{trip_id}",
     response_model=TripDetailResponse,
     status_code=200
@@ -27,24 +45,6 @@ async def retrive_trip(
             status_code=404, detail=f"Trip with id {trip_id} not found"
         )
     return trip
-
-
-@router.get(
-    "/",
-    response_model=List[TripResponse],
-    status_code=200
-)
-async def list_trips(
-    trip_service: TripService = Depends(get_trip_service),
-    db: Session = Depends(get_db)
-):
-    trips = await trip_service.get_trips(db)
-
-    if not trips:
-        raise HTTPException(
-            status_code=404, detail=f"There are no trips"
-        )
-    return trips
 
 
 @router.post(

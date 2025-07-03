@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from src.exceptions.exceptions import DatabaseError
 from src.repositories.destination_repository import DestinationRepository
-from src.schemas.geocode import BatchGeocodeResponse
+from src.schemas.geocode import BatchGeocodeResponse, DestinationResponse
 from src.services.geocode import GeocodeClass
 from src.utils.utils import haversine_distance
 
@@ -160,4 +160,58 @@ class DestinationService:
         destinations_with_distance.sort(key=lambda d: d["distance_from_user"])
         
         return destinations_with_distance
+    
 
+    async def get_optimal_route_destinations(
+        self,
+        trip_id: int,
+        user_lat: float,
+        user_lon: float,
+        db: Session
+    ):
+        db_destinations = await DestinationRepository().list_destinations_for_trip(trip_id, db)
+
+        destinations_dict = [dest._asdict() for dest in db_destinations]
+        unvisited = {dest["id"]: dest for dest in destinations_dict if dest["latitude"] is not None and dest["longitude"] is not None}
+        
+        optimal_route_ordered = []
+
+        current_lat, current_lon = user_lat, user_lon
+
+        # destinations_with_distance = []
+        while unvisited:
+            nearest_dest = None
+            min_distance = float("inf")
+
+            for dest_id, dest in unvisited.items():
+                if dest["latitude"] is not None and dest["longitude"] is not None:
+                    distance = haversine_distance(current_lat, current_lon, dest["latitude"], dest["longitude"])
+                    if distance < min_distance:
+                        nearest_dest = dest
+                        min_distance = distance
+                
+            if nearest_dest:
+                nearest_dest["distance_from_user"] = min_distance
+                optimal_route_ordered.append(nearest_dest)
+                # setattr(nearest_dest, "distance_from_user", min_distance)
+
+                current_lat, current_lon = nearest_dest["latitude"], nearest_dest["longitude"]
+
+                unvisited.pop(nearest_dest["id"])
+            else:
+                break
+        
+        return optimal_route_ordered
+    
+
+    async def mark_destinations_as_visited(
+        self,
+        trip_id: int,
+        destination_id: int,
+        db: Session
+    ):
+        destination = await DestinationRepository().update_destination_as_visited(trip_id, destination_id, db)
+
+        if not destination:
+            return None
+        return destination    

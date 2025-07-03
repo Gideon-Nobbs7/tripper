@@ -90,6 +90,33 @@ class DestinationRepository:
         return details
 
 
+    async def update_destination_as_visited(
+        self,
+        trip_id: int,
+        destination_id: int,
+        db: Session
+    ):
+        query = text("""
+            UPDATE destination
+            SET visited = true
+            WHERE id = :destination_id
+            AND trip_id = :trip_id
+            RETURNING *;   
+        """)
+
+        result = db.execute(query, {
+            "destination_id": destination_id,
+            "trip_id": trip_id
+        })
+        
+        updated_destination = result.mappings().fetchone()
+        db.commit()
+
+        if updated_destination:
+            return dict(updated_destination)
+        return None
+
+
     async def delete_destination(
         self,
         destination_id: int,
@@ -97,9 +124,9 @@ class DestinationRepository:
     ):
         query = text("""
             DELETE FROM destination
-            WHERE id = :id
+            WHERE id = :destination_id
         """)
         result = db.execute(query, {
-            "id": destination_id,
+            "destination_id": destination_id,
         })
         db.commit()

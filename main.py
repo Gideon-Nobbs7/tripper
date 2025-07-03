@@ -6,7 +6,15 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from src.database.config import engine, init_db
 from src.routers import destination, trips
 
-app = FastAPI()
+
+app = FastAPI(
+    title="Tripper API",
+    description="API for managing trips and their destinations",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
 Instrumentator().instrument(app).expose(app)
 
 

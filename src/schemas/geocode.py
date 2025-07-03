@@ -21,6 +21,7 @@ class DestinationResponse(BaseModel):
     latitude: float
     trip_id: int
     created_at: datetime
+    distance_from_user: Optional[float] = None
     
 
 class DestinationCreateRequest(BaseModel):
