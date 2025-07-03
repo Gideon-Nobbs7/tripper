@@ -17,8 +17,8 @@ class CoordinateResponse(BaseModel):
 class DestinationResponse(BaseModel):
     id: int
     location: str
-    longitude: float
     latitude: float
+    longitude: float
     trip_id: int
     created_at: datetime
     distance_from_user: Optional[float] = None

@@ -50,8 +50,8 @@ class DestinationService:
                     db=db,
                     trip_id=trip_id,
                     location=response.location if hasattr(response, 'location') else response["location"],
-                    longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"],
                     latitude=response.latitude if hasattr(response, 'latitude') else response["latitude"],
+                    longitude=response.longitude if hasattr(response, 'longitude') else response["longitude"]
                 )
                 results.append(result)
             except Exception as e:
