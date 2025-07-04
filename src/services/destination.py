@@ -23,7 +23,7 @@ class DestinationService:
         response = self.geocode_service.get_coordinates_for_destination(location=location)
 
         try:
-            result = await DestinationRepository().add_destination(
+            result = await DestinationRepository().create_destination(
                 db=db,
                 trip_id=trip_id,
                 location=location,
@@ -32,7 +32,6 @@ class DestinationService:
             )
         except Exception as e:
             raise DatabaseError(f"Failed to add destination {location}: {str(e)}")
-        
         return result
 
 
