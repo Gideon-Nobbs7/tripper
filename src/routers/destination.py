@@ -64,8 +64,8 @@ async def get_optimal_trip_route(
     trip_id: int,
     user_lat: float = Query(..., description="Starting latitude of the user"),
     user_lon: float = Query(..., description="Starting longitude of the user"),
-    destination_service: DestinationService = Depends(get_destination_service), # Your dependency
-    db: Session = Depends(get_db) # Your database dependency
+    destination_service: DestinationService = Depends(get_destination_service), 
+    db: Session = Depends(get_db) 
 ):
     """
     Calculates and returns an optimal route for visiting destinations in a trip,
